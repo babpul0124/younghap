@@ -9,14 +9,17 @@ import lombok.Setter;
 @Setter
 public class ApplicationDTO
 {
-    enum ApplicationStatus {미신청, 신청대기, 탈락;} // enum이라는 함수 선언
-    enum CheckOutStatus {환불대기, 환불}
+    enum ApplicationStatus {대기, 승인, 탈락;} // enum이라는 함수 선언
+    enum CheckOutStatus {환불대기, 퇴실;}
+    enum IsPayment {미납부, 납부;}
 
+    int applicationId;
     int preference;
     ApplicationStatus applicationStatus;
     LocalDateTime applicationDate;
-    LocalDateTime checkOutDate; // 이게 왜 INT로 되어 있을까?
+    LocalDateTime checkOutDate;
     String bankName;
     int accountNum;
     CheckOutStatus checkOutStatus;
+    IsPayment isPayment;
 }

@@ -14,6 +14,5 @@ public class DormitoryDTO
     int dormitoryFee;
     int mealFrequency;
     int money;
-    int roomNum;
-    int bedName;
+    int personal_room_id;
 }
