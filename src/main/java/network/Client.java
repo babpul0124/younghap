@@ -61,43 +61,48 @@ public class Client {
         final int EVENT_SCHEDULE_REGIST_REQUEST = 1;
         final int DORMITORY_FEE_AND_MEAL_REGIST_REQUEST = 2;
         final int APPLICATION_VIEW = 3;
-        final int DETERMINATION_ORDER = 4;
-        final int VIEW_REVIEW = 5;
-        final int REGIST_RECOMMENT = 6;
-        final int STATISTICAL_INFO_VIEW = 7;
-        final int LOGOUT = 8;
+        final int SELECTION_AND_ALLOCATION_OF_ROOMS_REQUEST = 4;
+        final int PAYERS_FOR_DORMITORY_FEE_VIEW = 5;
+        final int UNPAYERS_FOR_DORMITORY_FEE_VIEW = 6;
+        final int SUBMITTER_OF_TUBERCULOSIS_CERTIFICATE_VIEW = 7;
+        final int CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST = 8;
+        final int LOGOUT = 9;
 
         while(login) {
-            con.showOwnerScreen(me);
+            con.showManagerScreen(me);
 
             int option = Integer.parseInt(keyInput.readLine());
             switch (option) {
-                case STORE_REGIST_REQUEST:
+                case EVENT_SCHEDULE_REGIST_REQUEST:
                     con.registStore(me);
                     break;
 
-                case MENU_REGIST_REQUEST:
+                case DORMITORY_FEE_AND_MEAL_REGIST_REQUEST:
                     con.registMenuAndOption(me);
                     break;
 
-                case MANAGEMENT_TIME_MODIFICATION:
+                case APPLICATION_VIEW:
                     con.setRunningTime(me);
                     break;
 
-                case DETERMINATION_ORDER:
+                case SELECTION_AND_ALLOCATION_OF_ROOMS_REQUEST:
                     con.orderDetermination(me);
                     break;
 
-                case VIEW_REVIEW:
+                case PAYERS_FOR_DORMITORY_FEE_VIEW:
                     con.viewReview(me);
                     break;
 
-                case REGIST_RECOMMENT:
+                case UNPAYERS_FOR_DORMITORY_FEE_VIEW:
                     con.registRecommnet(me);
                     break;
 
-                case STATISTICAL_INFO_VIEW:
+                case SUBMITTER_OF_TUBERCULOSIS_CERTIFICATE_VIEW:
                     con.ownerStatisticsView(me);
+                    break;
+
+                case CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST:
+                    con.
                     break;
 
                 case LOGOUT:
@@ -114,41 +119,45 @@ public class Client {
 
     private void userRun() throws IOException {
         boolean login = true;
-        final int USER_MODIFICATION = 1;
-        final int VIEW_STORE = 2;
-        final int REGIST_ORDER = 3;
-        final int CANCEL_ORDER = 4;
-        final int VIEW_ORDER = 5;
-        final int REGIST_REVIEW = 6;
-        final int LOGOUT = 7;
+        final int EVENT_SCHEDULE_REGIST_VIEW = 1;
+        final int APPLICATION_REGIST_REQUEST = 2;
+        final int PASSED_VIEW = 3;
+        final int DORMITORY_FEE_VIEW_AND_PAY_REQUEST = 4;
+        final int SUBMIT_TUBERCULOSIS_CERTIFICATE_REQUEST = 5;
+        final int CHECK_OUT_APPLICATION_REQUEST = 6;
+        final int CHECK_OUT_STATUS_VIEW = 7;
+        final int LOGOUT = 8;
 
         while(login) {
             con.showUserScreen(me);
 
             int option = Integer.parseInt(keyInput.readLine());
             switch (option) {
-                case USER_MODIFICATION:
+                case EVENT_SCHEDULE_REGIST_VIEW:
                     con.modificationUser(me);
                     break;
 
-                case VIEW_STORE:
+                case APPLICATION_REGIST_REQUEST:
                     con.viewStore();
                     break;
 
-                case REGIST_ORDER:
+                case PASSED_VIEW:
                     con.registOrder(me);
                     break;
 
-                case CANCEL_ORDER:
+                case DORMITORY_FEE_VIEW_AND_PAY_REQUEST:
                     con.orderCancel(me);
                     break;
 
-                case VIEW_ORDER:
+                case SUBMIT_TUBERCULOSIS_CERTIFICATE_REQUEST:
                     con.viewOrder(me);
                     break;
 
-                case REGIST_REVIEW:
+                case CHECK_OUT_APPLICATION_REQUEST:
                     con.registReview(me);
+                    break;
+
+                case CHECK_OUT_STATUS_VIEW:
                     break;
 
                 case LOGOUT:
