@@ -1,7 +1,7 @@
 package network;
 
 // dto를 안넣어놓았습니다. 
-// 일단 제 PC에서는 없어도 돌아갔는데, 혹시 나중에 연결할 때 필요하면 넣으세요.
+// 나중에 연결할 때 필요하면 넣으세요.
 
 import java.io.*;
 import java.net.*;
