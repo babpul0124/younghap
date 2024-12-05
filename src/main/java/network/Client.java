@@ -102,7 +102,6 @@ public class Client {
                     break;
 
                 case CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST:
-                    con.
                     break;
 
                 case LOGOUT:
