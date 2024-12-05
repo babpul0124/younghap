@@ -1,6 +1,6 @@
 package persistence.dao;
 
-import persistence.dto.UserDTO;
+//import persistence.dto.UserDTO; // 여기서 DTO가 사용되지 않았어요.
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
