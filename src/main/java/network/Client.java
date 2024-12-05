@@ -3,6 +3,9 @@ package network;
 import java.io.*;
 import java.net.*;
 
+import persistence.dto.*;
+import persistence.enums.User_role;
+
 public class Client {
     private static final String IP = "127.0.0.1";
     private Socket cliSocket;
@@ -39,68 +42,25 @@ public class Client {
             me = con.login();
 
             if (me != null) {
-                String userAuthority = me.getAuthorityEnum().getName();
-                if (userAuthority.equals(Authority.OWNER.getName())) {
-                    ownerRun();
+                String login_id = me.getLogin_id(); //login_id 얻어옴
+                if (login_id.equals(User_role.MANAGER.getName())) {
+                    managerRun();
                 }
-
-                else if (userAuthority.equals(Authority.USER.getName())) {
+                else if (user_role.equals(User_role.USER.getName())) {
                     userRun();
                 }
             }
-
             else {
                 System.out.println(ErrorMessage.LOGIN_FAILED);
             }
         }
     }
 
-    private void adminRun() throws IOException {
+    private void managerRun() throws IOException {
         boolean login = true;
-        final int REGIST_OWNER_DETERMINATION = 1;
-        final int REGIST_STORE_DETERMINATION = 2;
-        final int REGIST_MENU_DETERMINATION = 3;
-        final int STATISTICAL_INFO_VIEW = 4;
-        final int LOGOUT = 5;
-
-        while(login) {
-            con.showAdminScreen(me);
-
-            int option = Integer.parseInt(keyInput.readLine());
-            switch (option) {
-                case REGIST_OWNER_DETERMINATION:
-                    con.registOwnerDetermination();
-                    break;
-
-                case REGIST_STORE_DETERMINATION:
-                    con.registStoreDetermination();
-                    break;
-
-                case REGIST_MENU_DETERMINATION:
-                    con.registMenuDetermination();
-                    break;
-
-                case STATISTICAL_INFO_VIEW:
-                    con.adminStatisticsView();
-                    break;
-
-                case LOGOUT:
-                    con.showLogoutMessage();
-                    login = false;
-                    break;
-
-                default:
-                    System.out.println(ErrorMessage.OUT_OF_BOUND);
-                    break;
-            }
-        }
-    }
-
-    private void ownerRun() throws IOException {
-        boolean login = true;
-        final int STORE_REGIST_REQUEST = 1;
-        final int MENU_REGIST_REQUEST = 2;
-        final int MANAGEMENT_TIME_MODIFICATION = 3;
+        final int EVENT_SCHEDULE_REGIST_REQUEST = 1;
+        final int DORMITORY_FEE_AND_MEAL_REGIST_REQUEST = 2;
+        final int APPLICATION_VIEW = 3;
         final int DETERMINATION_ORDER = 4;
         final int VIEW_REVIEW = 5;
         final int REGIST_RECOMMENT = 6;
