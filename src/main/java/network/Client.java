@@ -42,12 +42,12 @@ public class Client {
             me = con.login();
 
             if (me != null) {
-                String login_id = me.getLogin_id(); //login_id 얻어옴
-                if (login_id.equals(User_role.MANAGER.getName())) {
+                String User_role = me.getUser_role(); //User_role 얻어옴
+                if (User_role.equals(User_role.MANAGER.getName())) {
                     managerRun();
                 }
                 else if (user_role.equals(User_role.USER.getName())) {
-                    userRun();
+                    studentRun();
                 }
             }
             else {
@@ -116,7 +116,7 @@ public class Client {
         }
     }
 
-    private void userRun() throws IOException {
+    private void studentRun() throws IOException {
         boolean login = true;
         final int EVENT_SCHEDULE_REGIST_VIEW = 1;
         final int APPLICATION_REGIST_REQUEST = 2;
@@ -128,7 +128,7 @@ public class Client {
         final int LOGOUT = 8;
 
         while(login) {
-            con.showUserScreen(me);
+            con.showStudentScreen(me);
 
             int option = Integer.parseInt(keyInput.readLine());
             switch (option) {
