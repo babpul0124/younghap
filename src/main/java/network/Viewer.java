@@ -122,6 +122,19 @@ public class Viewer {
         return Integer.parseInt(keyInput.readLine());
     }
 
+    public int getDormitory_id(ArrayList<DormitoryDTO> DTOs) throws IOException {
+        viewDormitoryDTOs(DTOs);
+        System.out.println("조회할 생활관 ID 입력: ");
+        return Integer.parseInt(keyInput.readLine());
+    }
+
+    public void viewApplicationListDTOs(ArrayList<ApplicationListDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.ApplicationListDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
         viewStoreDTOs(storeDTOs);
         StoreDTO storeInfo = null;

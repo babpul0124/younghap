@@ -78,11 +78,11 @@ public class Client {
                     break;
 
                 case DORMITORY_FEE_AND_MEAL_REGIST_REQUEST:
-                    con.registMenuAndOption(me);
+                    con.registDormitory_feeAndmeal();
                     break;
 
                 case APPLICATION_VIEW:
-                    con.setRunningTime(me);
+                    con.viewApplication();
                     break;
 
                 case SELECTION_AND_ALLOCATION_OF_ROOMS_REQUEST:

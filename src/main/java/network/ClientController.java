@@ -39,15 +39,15 @@ public class ClientController {
             int option = viewer.initScreen(keyInput);
 
             if(option == LOGIN) {
-                Protocol request_login = new Protocol(ProtocolType.REQUEST, ProtocolCode.LOGIN, 0, null);
+                Protocol request_login = new Protocol(ProtocolType.REQUEST, ProtocolCode.CONNECT, 0, null);
                 dos.write(request_login.getBytes());
 
                 if (dis.read(readBuf) != -1) {
                     Protocol protocol = new Protocol(readBuf);
 
-                    if (protocol.getCode() == ProtocolCode.Login) {
+                    if (protocol.getCode() == ProtocolCode.ID_PWD) {
                         UserDTO user = viewer.loginScreen(keyInput);
-                        Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.LOGIN, (user.getLogin_id().getBytes().length + user.getPassword().getBytes().length + 8), user);
+                        Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.ID_PWD, (user.getLogin_id().getBytes().length + user.getPassword().getBytes().length + 8), user);
                         dos.write(respond_login.getBytes());
 
                         UserDTO me = null;
@@ -88,7 +88,7 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
 
-            if (protocol.getCode() == ProtocolCode.ACCEPT) {
+            if (protocol.getCode() == ProtocolCode.SUCCESS) {
                 System.out.println("성공");
             }
             else {
@@ -100,16 +100,16 @@ public class ClientController {
     public void registEvent_schedule() throws IOException {
         ArrayList<EventDTO> DTOs = new ArrayList<>();
 
-        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.EVENT_SCHEDULE, 0, null);
+        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SCHEDULE_REGISTER, 0, null);
         dos.write(registRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
-            if (protocol.getCode() == ProtocolCode.Event_scheduleInfo) {
+            if (protocol.getCode() == ProtocolCode.RESPONSE_SCHEDULE_INFO) {
                 String[] event_scheduleInfo = viewer.getEvent_scheduleInfo();
                 Protocol respond_event_scheduleInfo = new Protocol(
                         ProtocolType.RESPOND,
-                        ProtocolCode.EVENT_SCHEDULE,
+                        ProtocolCode.RESPONSE_SCHEDULE_INFO,
                         (byte) (event_scheduleInfo[0].getBytes().length +
                                 event_scheduleInfo[1].getBytes().length +
                                 event_scheduleInfo[2].getBytes().length),
@@ -119,7 +119,7 @@ public class ClientController {
 
                 if (dis.read(readBuf) != -1) {
                     Protocol response = new Protocol(readBuf);
-                    if (response.getCode() == ProtocolCode.ACCEPT) {
+                    if (response.getCode() == ProtocolCode.SUCCESS) {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
@@ -139,16 +139,16 @@ public class ClientController {
     public void registDormitory_feeAndmeal() throws IOException {
         ArrayList<DormitoryDTO> DTOs = new ArrayList<>();
 
-        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORMITORY_FEE_AND_MEAL, 0, null);
+        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.FEE_REGISTER, 0, null);
         dos.write(registRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
-            if (protocol.getCode() == ProtocolCode.DORMITORY_FEE_AND_MEALInfo) {
+            if (protocol.getCode() == ProtocolCode.RESPONSE_FEE_INFO) {
                 String[] Dormitory_feeAndmealInfo = viewer.getDormitory_feeAndmealInfo();
                 Protocol respondDormitory_feeAndmealInfo = new Protocol(
                         ProtocolType.RESPOND,
-                        ProtocolCode.DORMITORY_FEE_AND_MEAL,
+                        ProtocolCode.RESPONSE_FEE_INFO,
                         (byte) (Dormitory_feeAndmealInfo[0].getBytes().length +
                                 Dormitory_feeAndmealInfo[1].getBytes().length +
                                 Dormitory_feeAndmealInfo[2].getBytes().length +
@@ -159,7 +159,7 @@ public class ClientController {
 
                 if (dis.read(readBuf) != -1) {
                     Protocol response = new Protocol(readBuf);
-                    if (response.getCode() == ProtocolCode.ACCEPT) {
+                    if (response.getCode() == ProtocolCode.SUCCESS) {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
@@ -170,6 +170,42 @@ public class ClientController {
                         viewer.viewDormitoryDTOs(DTOs);
                     } else {
                         System.out.println("등록 오류");
+                    }
+                }
+            }
+        }
+    }
+
+    public void viewApplication() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.DORM_APPLICANT_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.DORM_APPLICANT_QUERY) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewApplicationListDTOs(ApplicationListDTOs);
                     }
                 }
             }
