@@ -1,3 +1,5 @@
+// 검토 완
+
 package persistence.dao;
 
 import java.sql.*;
@@ -18,7 +20,7 @@ public class DBConnection {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 conn = DriverManager.getConnection(URL, USER, PASSWORD);
             } catch (ClassNotFoundException | SQLException e) {
-                e.printStackTrace();
+                System.out.println("Error: " + e.getMessage());
                 throw new SQLException("Failed to connect to the database", e);
             }
         }
@@ -31,9 +33,7 @@ public class DBConnection {
                 if (!conn.isClosed()) {
                     conn.close();
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
         }
     }
 }

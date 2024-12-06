@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-
 public class DormitoryDAO {
 
     private final Connection connection;
@@ -111,7 +110,6 @@ public class DormitoryDAO {
 
                 DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
-
                 dormitoryDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 dormitoryDTO.setMealFrequency(rs.getInt("meal_frequency"));
                 dormitoryDTO.setMoney(rs.getInt("money"));
@@ -126,5 +124,29 @@ public class DormitoryDAO {
 
         // dormitory_id, dormitory_name, meal_frequency, money, room_capacity_num, dormitory_fee가 한 행인 리스트를 반환.
         return dormitoryFeeList;
+    }
+
+    // 생활관 목록 전송 함수
+    public ArrayList<DormitoryDTO> getDormitoryInfo() {
+
+        ArrayList<DormitoryDTO> dormitoryInfo = new ArrayList<>();
+
+        String query = "SELECT dormitory_id, dormitory_name, room_capacity_num FROM dormitory";
+
+        try(PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery())
+        {
+            while (rs.next()) {
+                DormitoryDTO dormitoryDTO = new DormitoryDTO();
+
+                dormitoryDTO.setDormitoryId(rs.getInt("dormitory_id"));
+                dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));
+                dormitoryDTO.setCapacityNum(rs.getInt("room_capacity_num"));
+
+                dormitoryInfo.add(dormitoryDTO);
+            }
+        }
+        catch (SQLException e) { System.out.println("error: " + e);}
+
+        return dormitoryInfo;
     }
 }

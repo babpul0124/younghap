@@ -1,153 +1,132 @@
 package persistence.dao;
-
-import persistence.dto.DormitoryDTO;
-import persistence.dto.DormitoryStudentInfoDTO;
-import persistence.dto.UserDTO;
-import persistence.dto.ApplicationStudentInfoDTO;
-import persistence.dto.StudentDormitoryInfoDTO;
-import persistence.dto.StudentDTO;
-import persistence.dto.paymentListDTO;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.sql.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import persistence.dto.ApplicationDTO;
+import java.util.ArrayList;
+import persistence.dto.ApplicationListDTO;
+
+
+import persistence.dto.DormitoryDTO;
+import persistence.dto.UserDTO;
+import persistence.dto.ApplicationStudentInfoDTO;
+import persistence.dto.StudentDormitoryInfoDTO;
+import persistence.dto.paymentListDTO;
+
+import java.sql.*;
+
 
 public class CheckInDAO {
+
     private final Connection connection;
-    public CheckInDAO(Connection connection) {
-        this.connection = connection;
-    }
+    public CheckInDAO(Connection connection) {this.connection = connection;}
 
-    // 입사신청
-    public void submitApplication(int dormitoryID, int studentID, int preference, String mealFrequency, boolean isSnoring) {
-        // 1. application 테이블에 데이터 삽입
-        String insertApplicationQuery = "INSERT INTO application (dormitory_id, student_id, preference, meal_frequency, application_date) " +
-                "VALUES (?, ?, ?, ?, ?)";
+    // 입사 신청 정보 등록 함수
+    public void submitApplication(int dormitoryId, int id, int preference, int mealFrequency, LocalDate applicationDate , boolean isSnoring) {
 
-        try (PreparedStatement pstmt = connection.prepareStatement(insertApplicationQuery)) {
-            pstmt.setInt(1, dormitoryID);  // dormitory_id
-            pstmt.setInt(2, studentID);    // student_id
-            pstmt.setInt(3, preference);   // preference
-            pstmt.setString(4, mealFrequency); // meal_frequency
-            pstmt.setObject(5, LocalDateTime.now()); // application_date (현재 시간)
+        String insertQuery = "INSERT INTO application (dormitory_id, student_id, preference, application_status ,meal_frequency, application_date) " + "VALUES (?, ?, ?, ?, ?, ?)";
 
-            pstmt.executeUpdate();  // application 테이블에 삽입
+        ApplicationDTO.ApplicationStatus status = ApplicationDTO.ApplicationStatus.대기;
 
-            // 2. student 테이블에서 해당 student의 is_snoring 값 업데이트
-            String updateStudentQuery = "UPDATE student SET is_snoring = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(insertQuery)) {
+            stmt.setInt(1, dormitoryId);
+            stmt.setInt(2, id);
+            stmt.setInt(3, preference);
+            stmt.setString(4, status.name());
+            stmt.setInt(5, mealFrequency);
+            stmt.setObject(6, applicationDate);
 
-            try (PreparedStatement pstmt2 = connection.prepareStatement(updateStudentQuery)) {
-                pstmt2.setBoolean(1, isSnoring);  // is_snoring 값 설정
-                pstmt2.setInt(2, studentID);      // 해당 student_id 설정
+            stmt.executeUpdate();
 
-                pstmt2.executeUpdate();  // student 테이블에서 is_snoring 값 업데이트
+
+            String updateQuery = "UPDATE student SET is_snoring = ? WHERE id = ?";
+
+            try (PreparedStatement stmt2 = connection.prepareStatement(updateQuery)) {
+                stmt2.setBoolean(1, isSnoring);
+                stmt2.setInt(2, id);
+
+                stmt2.executeUpdate();
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("error: " + e);}
     }
 
-    // 모든 생활관ID, 생활관명 추출
-    public List<DormitoryDTO> getUniqueDormitories() {
-        List<DormitoryDTO> dormitoryList = new ArrayList<>();
-        String query = "SELECT dormitory_id, dormitory_name FROM dormitory";  // 중복을 제외한 dormitory_id, dormitory_name 추출
+    // 입사신청자 정보 목록 전송 함수
+    public ArrayList<ApplicationListDTO> getApplicationList() {
 
-        try (PreparedStatement pstmt = connection.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
+        ArrayList<ApplicationListDTO> applicationList = new ArrayList<>();
 
-            while (rs.next()) {
-                DormitoryDTO dormitoryDTO = new DormitoryDTO();
-
-                dormitoryDTO.setDormitoryID(rs.getInt("dormitory_id"));
-                dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));
-
-                dormitoryList.add(dormitoryDTO);  // 리스트에 추가
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return dormitoryList;  // 결과 리스트 반환
-    }
-
-    // 관리자의 생활관별 신청자 조회
-    public List<DormitoryStudentInfoDTO> getDormitoryStudentInfo(int dormitoryID) {
-        List<DormitoryStudentInfoDTO> resultList = new ArrayList<>();
-        String query = "SELECT a.student_id, u.name, d.dormitory_name, d.room_capacity_num, a.meal_frequency " +
+        String query = "SELECT a.application_id, a.student_id, u.name, d.dormitory_name, d.room_capacity_num, d.dormitory_id " +
                 "FROM application a " +
-                "JOIN dormitory d ON a.dormitory_id = d.dormitory_id " +
                 "JOIN user u ON a.student_id = u.id " +
-                "WHERE a.dormitory_id = ?";
+                "JOIN dormitory d ON a.dormitory_id = d.dormitory_id";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setInt(1, dormitoryID);  // 입력받은 dormitoryID 값을 설정
+        try (PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery())
+        {
+            while (rs.next()) {
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
+                int applicationId = rs.getInt("application_id");
+                int studentId = rs.getInt("student_id");
+                String userName = rs.getString("name");
+                int dormitoryId = rs.getInt("dormitory_id");
+                String dormitoryName = rs.getString("dormitory_name");
+                int roomCapacityNum = rs.getInt("room_capacity_num");
 
-                    DormitoryDTO dormitoryDTO = new DormitoryDTO();
-                    dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));
-                    dormitoryDTO.setRoomCapacityNum(rs.getInt("room_capacity_num"));
-                    dormitoryDTO.setMealFrequency(rs.getInt("meal_frequency"));
+                // 관련 DTO 객체 생성 및 데이터 세팅
+                DormitoryDTO dormitoryDTO = new DormitoryDTO();
+                dormitoryDTO.setDormitoryId(dormitoryId);
+                dormitoryDTO.setDormitoryName(dormitoryName);
+                dormitoryDTO.setCapacityNum(roomCapacityNum);
 
-                    // StudentDTO 생성 및 설정
-                    UserDTO userDTO = new UserDTO();
-                    userDTO.setId(rs.getInt("student_id"));
-                    userDTO.setName(rs.getString("name"));
+                UserDTO userDTO = new UserDTO();
+                userDTO.setId(studentId);
+                userDTO.setName(userName);
 
-                    // DormitoryStudentInfoDTO 생성 및 각 DTO 설정
-                    DormitoryStudentInfoDTO dto = new DormitoryStudentInfoDTO();
-                    dto.setDormitoryDTO(dormitoryDTO);
-                    dto.setUserDTO(userDTO);
+                ApplicationDTO applicationDTO = new ApplicationDTO();
+                applicationDTO.setApplicationId(applicationId);
 
-                    resultList.add(dto);  // DTO를 리스트에 추가
-                }
+                ApplicationListDTO applicationListDTO = new ApplicationListDTO(dormitoryDTO, userDTO, applicationDTO);
+
+                applicationList.add(applicationListDTO);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return resultList;  // 결과 리스트 반환
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
+
+        return applicationList;
     }
 
     // 입사자 선발에 필요한 데이터 전송
-    public List<ApplicationStudentInfoDTO> getApplicationStudentInfo() {
-        List<ApplicationStudentInfoDTO> resultList = new ArrayList<>();
+    public ArrayList<ApplicationStudentInfoDTO> getApplicationStudentInfo() {
+
+        ArrayList<ApplicationStudentInfoDTO> resultList = new ArrayList<>();
 
         String query = "SELECT a.student_id, s.grade, a.preference, a.dormitory_id " +
                 "FROM application a " +
                 "JOIN student s ON a.student_id = s.id " +
                 "JOIN user u ON a.student_id = u.id";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery())
+        {
             while (rs.next()) {
                 ApplicationStudentInfoDTO dto = new ApplicationStudentInfoDTO();
-                dto.setStudentId(rs.getInt("student_id"));   // student_id
-                dto.setGrade(rs.getDouble("grade"));         // grade
-                dto.setPreference(rs.getInt("preference"));  // preference
-                dto.setDormitoryId(rs.getInt("dormitory_id"));  // dormitory_id
+                dto.setStudentId(rs.getInt("student_id"));
+                dto.setGrade(rs.getDouble("grade"));
+                dto.setPreference(rs.getInt("preference"));
+                dto.setDormitoryId(rs.getInt("dormitory_id"));
 
                 resultList.add(dto);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
-        return resultList;  // 최종 리스트 반환
+        return resultList;
     }
 
     //입사 상태 바꾸기
     public void updateApplicationStatus(int studentId, String newStatus) {
+
         String query = "UPDATE application SET application_status = ? WHERE student_id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -156,50 +135,48 @@ public class CheckInDAO {
             pstmt.setInt(2, studentId);    // 입력받은 student_id 값 설정
 
             pstmt.executeUpdate(); // 업데이트 실행
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     //호실 배정하기. passed 테이블 업데이트
     public void updatePassedAndDormitory(int studentId, int personalRoomId) {
+
         String querySelect = "SELECT application_id, dormitory_id " +
                 "FROM application " +
                 "WHERE student_id = ? AND application_status = '승인'";
         String queryUpdatePassed = "UPDATE passed SET personal_room_id = ?, dormitory_id = ? WHERE application_id = ?";
         String queryUpdateDormitory = "UPDATE dormitory SET capacity_num = capacity_num + 1 WHERE dormitory_id = ?";
 
-        try (PreparedStatement pstmtSelect = connection.prepareStatement(querySelect)) {
+        try (PreparedStatement stmtSelect = connection.prepareStatement(querySelect)) {
             // 1. application 테이블에서 데이터 추출
-            pstmtSelect.setInt(1, studentId);
-            try (ResultSet rs = pstmtSelect.executeQuery()) {
+            stmtSelect.setInt(1, studentId);
+            try (ResultSet rs = stmtSelect.executeQuery()) {
                 if (rs.next()) {
                     int applicationId = rs.getInt("application_id");
                     int dormitoryId = rs.getInt("dormitory_id");
 
                     // 2. passed 테이블 업데이트
-                    try (PreparedStatement pstmtUpdatePassed = connection.prepareStatement(queryUpdatePassed)) {
-                        pstmtUpdatePassed.setInt(1, personalRoomId); // 입력받은 personal_room_id
-                        pstmtUpdatePassed.setInt(2, dormitoryId);    // 추출한 dormitory_id
-                        pstmtUpdatePassed.setInt(3, applicationId); // 추출한 application_id
-                        pstmtUpdatePassed.executeUpdate();
+                    try (PreparedStatement stmtUpdatePassed = connection.prepareStatement(queryUpdatePassed)) {
+                        stmtUpdatePassed.setInt(1, personalRoomId); // 입력받은 personal_room_id
+                        stmtUpdatePassed.setInt(2, dormitoryId);    // 추출한 dormitory_id
+                        stmtUpdatePassed.setInt(3, applicationId); // 추출한 application_id
+                        stmtUpdatePassed.executeUpdate();
                     }
 
                     // 3. dormitory 테이블 업데이트
-                    try (PreparedStatement pstmtUpdateDormitory = connection.prepareStatement(queryUpdateDormitory)) {
-                        pstmtUpdateDormitory.setInt(1, dormitoryId); // 추출한 dormitory_id
-                        pstmtUpdateDormitory.executeUpdate();
+                    try (PreparedStatement stmtUpdateDormitory = connection.prepareStatement(queryUpdateDormitory)) {
+                        stmtUpdateDormitory.setInt(1, dormitoryId); // 추출한 dormitory_id
+                        stmtUpdateDormitory.executeUpdate();
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     // 생활관비 납부 권한 확인
-    public List<UserDTO> checkDormitoryPaymentAuthority() {
-        List<UserDTO> studentIds = new ArrayList<>();
+    public ArrayList<UserDTO> checkDormitoryPaymentAuthority() {
+        ArrayList<UserDTO> studentIds = new ArrayList<>();
         String query = "SELECT u.id " +
                 "FROM application a " +
                 "INNER JOIN passed p ON a.application_id = p.application_id " +
@@ -215,16 +192,14 @@ public class CheckInDAO {
                 userDTO.setId(studentId);  // UserDTO의 id 필드에 studentId 값을 설정
                 studentIds.add(userDTO);    // UserDTO 객체를 리스트에 추가
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
         return studentIds;
     }
 
     // 그 학생의 생활관 비용 조회하여 추출
-    public List<StudentDormitoryInfoDTO> getDormitoryAndMealInfoByStudentId(int studentId) {
-        List<StudentDormitoryInfoDTO> dormitoryInfoList = new ArrayList<>();
+    public ArrayList<StudentDormitoryInfoDTO> getDormitoryAndMealInfoByStudentId(int studentId) {
+        ArrayList<StudentDormitoryInfoDTO> dormitoryInfoList = new ArrayList<>();
         String query = "SELECT a.student_id, a.dormitory_id, a.meal_frequency, d.dormitory_fee, m.money " +
                 "FROM application a " +
                 "INNER JOIN passed p ON a.application_id = p.application_id " +
@@ -247,14 +222,12 @@ public class CheckInDAO {
                     dormitoryInfoList.add(infoDTO); // 리스트에 DTO 추가
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
         return dormitoryInfoList; // 결과 리스트 반환
     }
 
-    //납부상태로 바꾸기 .. 아니면 상태도 입력받아서 그냥 상태를 변경하는 함수로 바꿔도 됨.
+    //납부상태로 바꾸기
     public void updatePaymentStatus(int studentId, int dormitoryId) {
         String getApplicationIdQuery = "SELECT application_id FROM application WHERE student_id = ? AND dormitory_id = ?";
         String updatePaymentStatusQuery = "UPDATE passed SET isPayment = '납부' WHERE application_id = ?";
@@ -272,30 +245,26 @@ public class CheckInDAO {
                     // 2. 해당 application_id에 대해 isPayment를 '납부'로 업데이트
                     try (PreparedStatement updateStmt = connection.prepareStatement(updatePaymentStatusQuery)) {
                         updateStmt.setInt(1, applicationId);
-                        int rowsAffected = updateStmt.executeUpdate();
+                        updateStmt.executeUpdate();
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     // 결핵진단서 제출 !!! image_path를 impage로 바꾸고 타입도 블롭으로 바꿨어요!!!!!!
-    public void saveStudentImage(int studentId, StudentDTO studentDTO) {
+    public void saveStudentImage(int studentId, ApplicationDTO applicationDTO) {
         String query = "UPDATE application SET image = ? WHERE student_id = ?"; // students 테이블의 image 필드에 저장
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            byte[] imageBytes = studentDTO.getImage(); // StudentDTO에서 이미지 가져오기
+            byte[] imageBytes = applicationDTO.getImage(); // StudentDTO에서 이미지 가져오기
             if (imageBytes != null) {
                 statement.setBytes(1, imageBytes); // BLOB 필드에 이미지 저장
             }
             statement.setInt(2, studentId); // 학생 ID 설정
 
-            int rowsUpdated = statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            statement.executeUpdate();
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     //결핵 진단서 제출 확인
@@ -320,16 +289,16 @@ public class CheckInDAO {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
         return false; // 조회된 데이터가 없다면 미제출로 간주
     }
 
     // 생활관 비용 납부자&미납부자 생활관 별로 조회
-    public List<paymentListDTO> getDormitoryPaymentStatusList(int dormitoryId, String paymentStatus) {
-        List<paymentListDTO> resultList = new ArrayList<>();
+    public ArrayList<paymentListDTO> getDormitoryPaymentStatusList(int dormitoryId, String paymentStatus) {
+
+        ArrayList <paymentListDTO> resultList = new ArrayList<>();
+
         String query = "SELECT d.dormitory_name, u.id, u.name, d.dormitory_fee, p.isPayment " +
                 "FROM dormitory d " +
                 "INNER JOIN passed p ON d.dormitory_id = p.dormitory_id " +
@@ -344,7 +313,7 @@ public class CheckInDAO {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    // 결과에서 필요한 값들을 DTO에 저장
+
                     paymentListDTO dto = new paymentListDTO();
                     dto.setDormitoryName(resultSet.getString("dormitory_name"));
                     dto.setStudentId(resultSet.getInt("id"));
@@ -355,9 +324,7 @@ public class CheckInDAO {
                     resultList.add(dto);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e){System.out.println("Error: " + e.getMessage());}
 
         return resultList;
     }
