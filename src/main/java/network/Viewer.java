@@ -149,6 +149,13 @@ public class Viewer {
         System.out.println();
     }
 
+    public void viewApplicationDTOs(ArrayList<ApplicationDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.ApplicationDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
         viewStoreDTOs(storeDTOs);
         StoreDTO storeInfo = null;

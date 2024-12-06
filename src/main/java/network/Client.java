@@ -99,7 +99,7 @@ public class Client {
                     break;
 
                 case SUBMITTER_OF_TUBERCULOSIS_CERTIFICATE_VIEW:
-                    con.ownerStatisticsView(me);
+                    con.viewTuberculosisCertificater();
                     break;
 
                 case CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST:

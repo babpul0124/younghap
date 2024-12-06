@@ -227,7 +227,7 @@ public class ClientController {
 
     public void viewPayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<paymentListDTO> paymentListDTO = new ArrayList<>();
+        ArrayList<paymentListDTO> paymentListDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -250,11 +250,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                paymentListDTO.add((paymentListDTO) new Protocol(readBuf).getData());
+                                paymentListDTOs.add((paymentListDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewPaymentListDTOs(paymentListDTO);
+                        viewer.viewPaymentListDTOs(paymentListDTOs);
                     }
                 }
             }
@@ -263,7 +263,7 @@ public class ClientController {
 
     public void viewUnpayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<paymentListDTO> paymentListDTO = new ArrayList<>();
+        ArrayList<paymentListDTO> paymentListDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -286,11 +286,49 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                paymentListDTO.add((paymentListDTO) new Protocol(readBuf).getData());
+                                paymentListDTOs.add((paymentListDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewUnpaymentListDTOs(paymentListDTO);
+                        viewer.viewUnpaymentListDTOs(paymentListDTOs);
+                    }
+                }
+            }
+        }
+    }
+
+    TUBERCULOSIS_CERTIFICATE_QUERY
+
+    public void viewTuberculosisCertificater() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<ApplicationDTO> ApplicationDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.TUBERCULOSIS_CERTIFICATE_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.TUBERCULOSIS_CERTIFICATE_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.TUBERCULOSIS_CERTIFICATE_QUERY) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                ApplicationDTOs.add((ApplicationDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewApplicationDTOs(ApplicationDTOs);
                     }
                 }
             }
