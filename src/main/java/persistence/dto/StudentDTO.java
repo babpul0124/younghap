@@ -7,12 +7,12 @@ import lombok.Setter;
 @Setter
 public class StudentDTO extends UserDTO
 {
+    enum position {학부생, 대학원생}
+
     int score;
     String yearAndSemester;
     String lastTwoSemesters;
     double grade;
     String address;
     String gender;
-    boolean is_snoring; // TINYINT(1)타입임.
-    byte[] image; // 결핵진단서이미지 바이너리 파일임.
 }

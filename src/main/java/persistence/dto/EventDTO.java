@@ -14,5 +14,9 @@ public class EventDTO
     LocalDateTime startDate;
     LocalDateTime endDate;
     String eventName;
-    LocalDate writed_date;
+    LocalDate writedDate;
+    UserDTO userDTO;
+
+    LocalDate checkInDate;
+    LocalDate originalCheckOutDate;
 }
