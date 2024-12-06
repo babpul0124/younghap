@@ -21,24 +21,24 @@ public class Server {
     //서버 소켓 시작
     public void run(){
         try {
-            //서버 소켓 생성 및 초기화
+            //서버 소켓 생성 및 초기화 / 클라이언트 연결 기다림.
             serverSocket = new ServerSocket(PORT, 50, InetAddress.getByName(IP));
             threadPool = Executors.newFixedThreadPool(10); //최대 10개의 클라이언트 처리 가능
 
             System.out.println("System is running at " + IP + " : " + PORT);
 
             while(true){
-                //클라이언트 접속 대기
-                Socket clientSocket = serverSocket.accept();
+                //클라이언트 접속 대기 / 클라이언트 연결 기다림
+                Socket clientSocket = serverSocket.accept(); //클라이언트 연결 요청 수
                 System.out.println("New client connected: " + clientSocket.getInetAddress().getHostAddress());
 
                 // 클라이언트 처리 스레드 실행
-                threadPool.execute(new ClientHandler(clientSocket));
+                threadPool.execute(new ClientHandler(clientSocket)); // 각 클라이언트마다 처리할 스레드를 실행
             }
         } catch (IOException e) {
-            System.err.println("Server error: " + e.getMessage());
+            System.err.println("Server error: " + e.getMessage()); // 예외 발생 시 서버 오류 메시지 출력
         } finally {
-            stop();
+            stop(); //서버 종료시 호
         }
     }
 
@@ -46,14 +46,14 @@ public class Server {
     public void stop() {
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
-                serverSocket.close();
+                serverSocket.close(); // 서버 소켓을 닫음
             }
             if (threadPool != null && !threadPool.isShutdown()) {
-                threadPool.shutdown();
+                threadPool.shutdown(); // 스레드 풀 종료
             }
             System.out.println("Server stopped.");
         } catch (IOException e) {
-            System.err.println("Error stopping server: " + e.getMessage());
+            System.err.println("Error stopping server: " + e.getMessage()); // 종료 중 오류 발생 시 메시지 출력
         }
     }
 
