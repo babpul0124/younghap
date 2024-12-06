@@ -1,5 +1,6 @@
 package network;
 
+import jdk.jfr.Event;
 import network.*;
 import org.testng.internal.collections.Pair;
 import persistence.PooledDataSource;
@@ -96,11 +97,89 @@ public class ClientController {
         }
     }
 
-    public ArrayList<StatisticsDTO> getAllStatDTO() throws IOException {
-        Protocol requestAllStatDTOs = new Protocol(ProtocolType.SEARCH, (byte)(ProtocolCode.STORE | ProtocolCode.HISTORY), 0, null);
-        dos.write(requestAllStatDTOs.getBytes());
+    public void registEvent_schedule() throws IOException {
+        ArrayList<EventDTO> DTOs = new ArrayList<>();
 
-        ArrayList<StatisticsDTO> DTOs = new ArrayList<>();
+        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.EVENT_SCHEDULE, 0, null);
+        dos.write(registRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.Event_scheduleInfo) {
+                String[] event_scheduleInfo = viewer.getEvent_scheduleInfo();
+                Protocol respond_event_scheduleInfo = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.EVENT_SCHEDULE,
+                        (byte) (event_scheduleInfo[0].getBytes().length +
+                                event_scheduleInfo[1].getBytes().length +
+                                event_scheduleInfo[2].getBytes().length),
+                        event_scheduleInfo
+                );
+                dos.write(respond_event_scheduleInfo.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.ACCEPT) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                DTOs.add((EventDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewEvent_scheduleDTOs(DTOs);
+                    } else {
+                        System.out.println("등록 오류");
+                    }
+                }
+            }
+        }
+    }
+
+    public void registDormitory_feeAndmeal() throws IOException {
+        ArrayList<DormitoryDTO> DTOs = new ArrayList<>();
+
+        Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORMITORY_FEE_AND_MEAL, 0, null);
+        dos.write(registRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.DORMITORY_FEE_AND_MEALInfo) {
+                String[] event_scheduleInfo = viewer.getEvent_scheduleInfo();
+                Protocol respond_event_scheduleInfo = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.EVENT_SCHEDULE,
+                        (byte) (event_scheduleInfo[0].getBytes().length +
+                                event_scheduleInfo[1].getBytes().length +
+                                event_scheduleInfo[2].getBytes().length),
+                        event_scheduleInfo
+                );
+                dos.write(respond_event_scheduleInfo.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.ACCEPT) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                DTOs.add((EventDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewEvent_scheduleDTOs(DTOs);
+                    } else {
+                        System.out.println("등록 오류");
+                    }
+                }
+            }
+        }
+    }
+
+    public ArrayList<ApplicationDTO> getAllApplicationDTO(ApplicationDTO info) throws IOException {
+        Protocol requestAllApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.APPLICATION, 0, info);
+        dos.write(requestAllApplicationDTOs.getBytes());
+
+        ArrayList<ApplicationDTO> DTOs = new ArrayList<>();
         int listLength = 0;
         if (dis.read(readBuf) != -1) {
             listLength = Deserializer.byteArrayToInt(readBuf);
@@ -108,7 +187,7 @@ public class ClientController {
         }
         for(int i = 0; i < listLength; i++) {
             if (dis.read(readBuf) != -1) {
-                DTOs.add((StatisticsDTO) new Protocol(readBuf).getData());
+                DTOs.add((ApplicationDTO) new Protocol(readBuf).getData());
                 send_ack();
             }
         }
@@ -116,11 +195,11 @@ public class ClientController {
         return DTOs;
     }
 
-    public ArrayList<StatisticsDTO> getAllStatDTO(StoreDTO info) throws IOException {
-        Protocol requestAllStatDTOs = new Protocol(ProtocolType.SEARCH, (byte)(ProtocolCode.STORE | ProtocolCode.HISTORY), 0, info);
-        dos.write(requestAllStatDTOs.getBytes());
+    public ArrayList<DormitoryDTO> getDormitoryDTO() throws IOException {
+        Protocol requestAllDormitoryDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORMITORY, 0, null);
+        dos.write(requestAllDormitoryDTOs.getBytes());
 
-        ArrayList<StatisticsDTO> DTOs = new ArrayList<>();
+        ArrayList<DormitoryDTO> DTOs = new ArrayList<>();
         int listLength = 0;
         if (dis.read(readBuf) != -1) {
             listLength = Deserializer.byteArrayToInt(readBuf);
@@ -128,7 +207,7 @@ public class ClientController {
         }
         for(int i = 0; i < listLength; i++) {
             if (dis.read(readBuf) != -1) {
-                DTOs.add((StatisticsDTO) new Protocol(readBuf).getData());
+                DTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
                 send_ack();
             }
         }
@@ -136,32 +215,12 @@ public class ClientController {
         return DTOs;
     }
 
-    public ArrayList<OrdersDTO> getAllOrderDTO() throws IOException {
-        Protocol requestAllOrderDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.ORDER, 0, null);
-        dos.write(requestAllOrderDTOs.getBytes());
+    public ArrayList<ApplicationDTO> getSearchedApplicationDTO(DTO dormitory) throws IOException {
+        Protocol requestSearchedApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.SearchedApplication, 0, dormitory);
+        dos.write(requestSearchedApplicationDTOs.getBytes());
+        //dormitory에 해당하는 모든 Orders 리스트를 가져옴
 
-        ArrayList<OrdersDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((OrdersDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<TotalOrdersDTO> getAllTotalOrderDTO(DTO info) throws IOException {
-        Protocol requestAllMyOrderDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.ORDER, 0, info);
-        dos.write(requestAllMyOrderDTOs.getBytes());
-        //info에 해당하는 모든 Orders 리스트를 가져옴
-
-        ArrayList<TotalOrdersDTO> DTOs = new ArrayList<>();
+        ArrayList<ApplicationDTO> DTOs = new ArrayList<>();
         int listLength = 0;
 
         if (dis.read(readBuf) != -1) {
@@ -171,7 +230,7 @@ public class ClientController {
 
         for(int i = 0; i < listLength; i++) {
             if (dis.read(readBuf) != -1) {
-                DTOs.add((TotalOrdersDTO) new Protocol(readBuf).getData());
+                DTOs.add((ApplicationDTO) new Protocol(readBuf).getData());
                 send_ack();
             }
         }
@@ -459,45 +518,6 @@ public class ClientController {
                         viewer.showRefusalMessage();
                         Protocol registRefuse = new Protocol(ProtocolType.RESPONSE, (byte) (ProtocolCode.STORE | ProtocolCode.REFUSAL), 0, DTOs.get(idx));
                         //전달한 가게 등록 DTO의 정보를 가게 등록 테이블에서 삭제하시오.
-                        dos.write(registRefuse.getBytes());
-                        DTOs.remove(idx);
-                        break;
-                    }
-
-                    else {
-                        System.out.println(ErrorMessage.OUT_OF_BOUND);
-                    }
-                }
-            }
-
-            else {
-                break;
-            }
-        }
-    }
-
-    public void registMenuDetermination() throws IOException {
-        ArrayList<MenuDTO> DTOs = getAllMenuDTO();
-
-        while(DTOs.size() > 0) {
-            viewer.viewMenuDTOs(DTOs);
-            int idx = viewer.getIdx();
-
-            if (0 <= idx && idx < DTOs.size()) {
-                while (true) {
-                    String ans = viewer.getDetermination();
-
-                    if (ans.equals("Y") || ans.equals("y")) {
-                        viewer.showAcceptMessage();
-                        Protocol registAccept = new Protocol(ProtocolType.RESPONSE, (byte) (ProtocolCode.MENU | ProtocolCode.ACCEPT), 0, DTOs.get(idx));
-                        dos.write(registAccept.getBytes());
-                        DTOs.remove(idx);
-                        break;
-                    }
-
-                    else if (ans.equals("N") || ans.equals("n")) {
-                        viewer.showRefusalMessage();
-                        Protocol registRefuse = new Protocol(ProtocolType.RESPONSE, (byte) (ProtocolCode.MENU | ProtocolCode.REFUSAL), 0, DTOs.get(idx));
                         dos.write(registRefuse.getBytes());
                         DTOs.remove(idx);
                         break;

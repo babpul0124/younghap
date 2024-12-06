@@ -24,6 +24,21 @@ public class Viewer {
         return Integer.parseInt(keyInput.readLine());
     }
 
+    public UserDTO loginScreen(BufferedReader keyInput) throws IOException {
+        UserDTO userInfo = new UserDTO();
+
+        System.out.print("ID : ");
+        userInfo.setLogin_id(keyInput.readLine());
+        System.out.print("PW : ");
+        userInfo.setPassword(keyInput.readLine());
+
+        return userInfo;
+    }
+
+    public void logout() {
+        System.out.println("로그아웃합니다.\n");
+    }
+
     public void managerScreen(UserDTO userInfo) {
         System.out.println();
         System.out.println("관리자 " + userInfo.getName() + "님 환영합니다.");
@@ -54,19 +69,25 @@ public class Viewer {
         System.out.print("입력 : ");
     }
 
-    public UserDTO loginScreen(BufferedReader keyInput) throws IOException {
-        UserDTO userInfo = new UserDTO();
+    public String[] getEvent_scheduleInfo() throws IOException {
+        String[] result = new String[3];
 
-        System.out.print("ID : ");
-        userInfo.setLogin_id(keyInput.readLine());
-        System.out.print("PW : ");
-        userInfo.setPassword(keyInput.readLine());
+        System.out.println("[선발 일정 등록]");
+        System.out.print("일정 제목 : ");
+        result[0] = keyInput.readLine();
+        System.out.print("시작일 : ");
+        result[1] = keyInput.readLine();
+        System.out.print("종료일 : ");
+        result[2] = keyInput.readLine();
 
-        return userInfo;
+        return result;
     }
 
-    public void logout() {
-        System.out.println("로그아웃합니다.\n");
+    public void viewEvent_scheduleDTOs(ArrayList<EventDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.event_scheduleDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
     }
 
     public int registMenuAndOptionScreen() throws IOException {

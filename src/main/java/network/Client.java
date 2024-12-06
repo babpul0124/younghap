@@ -74,7 +74,7 @@ public class Client {
             int option = Integer.parseInt(keyInput.readLine());
             switch (option) {
                 case EVENT_SCHEDULE_REGIST_REQUEST:
-                    con.registStore(me);
+                    con.registEvent_schedule();
                     break;
 
                 case DORMITORY_FEE_AND_MEAL_REGIST_REQUEST:
