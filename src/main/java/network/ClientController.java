@@ -212,6 +212,91 @@ public class ClientController {
         }
     }
 
+    public void requestSelectionAndAllocationOfRooms() throws IOException {
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.ROOM_ASSIGNMENT, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.SUCCESS) {
+                System.out.println("성공");
+            }
+        }
+    }
+
+    public void viewPayersForDormitoryFee() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<paymentListDTO> paymentListDTO = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.PAID_APPLICANT_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.PAID_APPLICANT_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.PAID_APPLICANT_QUERY) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                paymentListDTO.add((paymentListDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewPaymentListDTOs(paymentListDTO);
+                    }
+                }
+            }
+        }
+    }
+
+    public void viewUnpayersForDormitoryFee() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<paymentListDTO> paymentListDTO = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.PAID_APPLICANT_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.UNPAID_APPLICANT_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.UNPAID_APPLICANT_QUERY) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                paymentListDTO.add((paymentListDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewUnpaymentListDTOs(paymentListDTO);
+                    }
+                }
+            }
+        }
+    }
+
     public ArrayList<ApplicationDTO> getAllApplicationDTO(ApplicationDTO info) throws IOException {
         Protocol requestAllApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.APPLICATION, 0, info);
         dos.write(requestAllApplicationDTOs.getBytes());

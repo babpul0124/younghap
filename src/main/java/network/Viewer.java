@@ -135,6 +135,20 @@ public class Viewer {
         System.out.println();
     }
 
+    public void viewPaymentListDTOs(ArrayList<paymentListDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.PaymentListDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
+    public void viewUnpaymentListDTOs(ArrayList<paymentListDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.PaymentListDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
         viewStoreDTOs(storeDTOs);
         StoreDTO storeInfo = null;
