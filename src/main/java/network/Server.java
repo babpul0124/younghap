@@ -67,6 +67,7 @@ public class Server {
     private static class ClientHandler implements Runnable {
         private Socket clientSocket;
 
+        // 생성자에서 클라이언트 소켓을 받아옴
         public ClientHandler(Socket clientSocket) {
             this.clientSocket = clientSocket;
         }
@@ -74,6 +75,7 @@ public class Server {
         @Override
         public void run() {
             try (
+                    // 클라이언트로부터 데이터를 읽을 BufferedReader와 응답할 PrintWriter 생성
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
             ) {
@@ -85,32 +87,32 @@ public class Server {
 
                     // 메시지에 따른 처리 로직 (학생, 관리자 구분)
                     if (message.startsWith("STUDENT")) {
-                        handleStudentRequest(message, out);
+                        handleStudentRequest(message, out); // 학생 요청 처리
                     } else if (message.startsWith("MANAGER")) {
-                        handleManagerRequest(message, out);
+                        handleManagerRequest(message, out); // 관리 요청 처리
                     } else {
-                        out.println("UNKNOWN COMMAND");
+                        out.println("UNKNOWN COMMAND"); // 알 수 없는 명령어 처리
                     }
                 }
             } catch (IOException e) {
                 System.err.println("Client handler error: " + e.getMessage());
             } finally {
                 try {
-                    clientSocket.close();
+                    clientSocket.close(); // 클라이언트와의 연결 종료
                 } catch (IOException e) {
-                    System.err.println("Error closing client socket: " + e.getMessage());
+                    System.err.println("Error closing client socket: " + e.getMessage()); // 클라이언트 소켓 종료 시 오류 발생 시 메시지 출력
                 }
             }
         }
 
         private void handleStudentRequest(String message, PrintWriter out) {
             // 학생 요청 처리 로직 구현
-            out.println("Student request received: " + message);
+            out.println("Student request received: " + message); // 학생 요청을 받았음을 클라이언트에게 응답
         }
 
         private void handleManagerRequest(String message, PrintWriter out) {
             // 관리자 요청 처리 로직 구현
-            out.println("Manager request received: " + message);
+            out.println("Manager request received: " + message); // 관리자 요청을 받았음을 클라이언트에게 응답
         }
     }
 }
