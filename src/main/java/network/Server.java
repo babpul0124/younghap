@@ -60,6 +60,7 @@ public class Server {
 //밑의 코드들이 없어도 서버와 클라이언트의 연결은 정상적으로 이루어진다.
 // ClientHandler가 없으면 클라이언트의 요청을 처리할 수 없기 때문에 연결은 되지만 상호작용이 불가능.
 // 클라이언트와의 상호작용 및 처리 로직이 필요 없다면 ClientHandler 없이 코드를 사용해도 무관하다.
+// 그러니, 클라이언트로부터 상호작용이 필요하거나 그에 따른 처리가 필요할 경우는 밑의 코드를 사용하고, 아니면 지우면 됩니더.
     
     // 클라이언트 요청을 처리하는 내부 클래스
     private static class ClientHandler implements Runnable {
