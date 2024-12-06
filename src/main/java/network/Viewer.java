@@ -90,6 +90,29 @@ public class Viewer {
         System.out.println();
     }
 
+    public String[] getDormitory_feeAndmealInfo() throws IOException {
+        String[] result = new String[4];
+
+        System.out.println("[생활관 사용료 및 급식비 등록]");
+        System.out.print("생활관명 : ");
+        result[0] = keyInput.readLine();
+        System.out.print("생활관비 : ");
+        result[1] = keyInput.readLine();
+        System.out.print("식사 유형 (n일식)  : ");
+        result[2] = keyInput.readLine();
+        System.out.print("급식비  : ");
+        result[3] = keyInput.readLine();
+
+        return result;
+    }
+
+    public void viewDormitoryDTOs(ArrayList<DormitoryDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.DormitoryDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
     public int registMenuAndOptionScreen() throws IOException {
         System.out.println("[1] 메뉴 등록");
         System.out.println("[2] 옵션 등록");

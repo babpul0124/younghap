@@ -145,16 +145,17 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORMITORY_FEE_AND_MEALInfo) {
-                String[] event_scheduleInfo = viewer.getEvent_scheduleInfo();
-                Protocol respond_event_scheduleInfo = new Protocol(
+                String[] Dormitory_feeAndmealInfo = viewer.getDormitory_feeAndmealInfo();
+                Protocol respondDormitory_feeAndmealInfo = new Protocol(
                         ProtocolType.RESPOND,
-                        ProtocolCode.EVENT_SCHEDULE,
-                        (byte) (event_scheduleInfo[0].getBytes().length +
-                                event_scheduleInfo[1].getBytes().length +
-                                event_scheduleInfo[2].getBytes().length),
-                        event_scheduleInfo
+                        ProtocolCode.DORMITORY_FEE_AND_MEAL,
+                        (byte) (Dormitory_feeAndmealInfo[0].getBytes().length +
+                                Dormitory_feeAndmealInfo[1].getBytes().length +
+                                Dormitory_feeAndmealInfo[2].getBytes().length +
+                                Dormitory_feeAndmealInfo[3].getBytes().length),
+                        Dormitory_feeAndmealInfo
                 );
-                dos.write(respond_event_scheduleInfo.getBytes());
+                dos.write(respondDormitory_feeAndmealInfo.getBytes());
 
                 if (dis.read(readBuf) != -1) {
                     Protocol response = new Protocol(readBuf);
@@ -162,11 +163,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                DTOs.add((EventDTO) new Protocol(readBuf).getData());
+                                DTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewEvent_scheduleDTOs(DTOs);
+                        viewer.viewDormitoryDTOs(DTOs);
                     } else {
                         System.out.println("등록 오류");
                     }
