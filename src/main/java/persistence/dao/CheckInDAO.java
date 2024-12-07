@@ -54,7 +54,7 @@ public class CheckInDAO {
     }
 
     // 입사신청자 정보 목록 전송 함수
-   public ArrayList<ApplicationListDTO> getApplicationList() {
+    public ArrayList<ApplicationListDTO> getApplicationList() {
 
         ArrayList<ApplicationListDTO> applicationList = new ArrayList<>();
 
@@ -90,7 +90,7 @@ public class CheckInDAO {
 
                 ApplicationDTO applicationDTO = new ApplicationDTO();
                 applicationDTO.setApplicationId(applicationId);
-                applicationDTO.setApplicationStatus(applicationStatus); 
+                applicationDTO.setApplicationStatus(applicationStatus); // Enum 값 설정
 
                 ApplicationListDTO applicationListDTO = new ApplicationListDTO(dormitoryDTO, userDTO, applicationDTO);
 
@@ -130,22 +130,22 @@ public class CheckInDAO {
     }
 
     //입사 상태 바꾸기
-    public void updateApplicationStatus(int studentId, String newStatus) {
+    public void updateApplicationStatus(int id, String applicationStatus) {
 
         String query = "UPDATE application SET application_status = ? WHERE student_id = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
             // 새 상태 설정 (enum 값으로 설정해야 함)
-            pstmt.setString(1, newStatus); // 예: "대기", "승인", "탈락"
-            pstmt.setInt(2, studentId);    // 입력받은 student_id 값 설정
+            stmt.setString(1, applicationStatus); // 예: "대기", "승인", "탈락"
+            stmt.setInt(2, id);    // 입력받은 student_id 값 설정
 
-            pstmt.executeUpdate(); // 업데이트 실행
+            stmt.executeUpdate(); // 업데이트 실행
         }
         catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     //호실 배정하기. passed 테이블 업데이트
-    public void updatePassedAndDormitory(int studentId, int personalRoomId) {
+    public void updatePassedAndDormitory(int id, int personalRoomId) {
 
         String querySelect = "SELECT application_id, dormitory_id " +
                 "FROM application " +
@@ -155,7 +155,7 @@ public class CheckInDAO {
 
         try (PreparedStatement stmtSelect = connection.prepareStatement(querySelect)) {
             // 1. application 테이블에서 데이터 추출
-            stmtSelect.setInt(1, studentId);
+            stmtSelect.setInt(1, id);
             try (ResultSet rs = stmtSelect.executeQuery()) {
                 if (rs.next()) {
                     int applicationId = rs.getInt("application_id");
@@ -179,28 +179,6 @@ public class CheckInDAO {
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
-    // 생활관비 납부 권한 확인
-    public ArrayList<UserDTO> checkDormitoryPaymentAuthority() {
-        ArrayList<UserDTO> studentIds = new ArrayList<>();
-        String query = "SELECT u.id " +
-                "FROM application a " +
-                "INNER JOIN passed p ON a.application_id = p.application_id " +
-                "INNER JOIN users u ON a.application_id = u.id";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            // 쿼리 결과에서 id를 추출하여 UserDTO 객체에 담고 리스트에 추가
-            while (resultSet.next()) {
-                int studentId = resultSet.getInt("id");
-                UserDTO userDTO = new UserDTO();
-                userDTO.setId(studentId);  // UserDTO의 id 필드에 studentId 값을 설정
-                studentIds.add(userDTO);    // UserDTO 객체를 리스트에 추가
-            }
-        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
-
-        return studentIds;
-    }
 
     // 그 학생의 생활관 비용 조회하여 추출
     public ArrayList<StudentDormitoryInfoDTO> getDormitoryAndMealInfoByStudentId(int studentId) {
@@ -233,13 +211,13 @@ public class CheckInDAO {
     }
 
     //납부상태로 바꾸기
-    public void updatePaymentStatus(int studentId, int dormitoryId) {
+    public void updatePaymentStatus(int id, int dormitoryId) {
         String getApplicationIdQuery = "SELECT application_id FROM application WHERE student_id = ? AND dormitory_id = ?";
         String updatePaymentStatusQuery = "UPDATE passed SET isPayment = '납부' WHERE application_id = ?";
 
         try (PreparedStatement getAppStmt = connection.prepareStatement(getApplicationIdQuery)) {
             // 1. 사용자 ID와 dormitory_id를 이용해 application_id 추출
-            getAppStmt.setInt(1, studentId);
+            getAppStmt.setInt(1, id);
             getAppStmt.setInt(2, dormitoryId);
 
             try (ResultSet rs = getAppStmt.executeQuery()) {
@@ -257,46 +235,49 @@ public class CheckInDAO {
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
-    // 결핵진단서 제출 !!! image_path를 impage로 바꾸고 타입도 블롭으로 바꿨어요!!!!!!
-    public void saveStudentImage(int studentId, ApplicationDTO applicationDTO) {
+
+    ApplicationDTO applicationDTO = new ApplicationDTO();
+    // 결핵진단서 제출
+    public void saveStudentImage(int id, byte[] image) {
+
         String query = "UPDATE application SET image = ? WHERE student_id = ?"; // students 테이블의 image 필드에 저장
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            byte[] imageBytes = applicationDTO.getImage(); // StudentDTO에서 이미지 가져오기
+            byte[] imageBytes = applicationDTO.getImage();
             if (imageBytes != null) {
                 statement.setBytes(1, imageBytes); // BLOB 필드에 이미지 저장
             }
-            statement.setInt(2, studentId); // 학생 ID 설정
+            statement.setInt(2, id); // 학생 ID 설정
 
             statement.executeUpdate();
+
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     //결핵 진단서 제출 확인
-    public boolean checkStudentImageSubmitted(int studentId) {
+    public String checkStudentImageSubmitted(int id) {
         String query = "SELECT image FROM application WHERE student_id = ?"; // application 테이블에서 image 조회
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, studentId); // student_id 설정
+            statement.setInt(1, id);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     Blob imageBlob = resultSet.getBlob("image"); // image 컬럼 조회
 
                     if (imageBlob != null && imageBlob.length() > 0) {
-                        // image가 null이 아니고 크기가 0보다 크면 제출한 것으로 간주
+
                         System.out.println("결핵진단서 제출됨.");
-                        return true;
+                        applicationDTO.setResult("Yes");
                     } else {
-                        // image가 null이거나 크기가 0이면 제출하지 않은 것으로 간주
+
                         System.out.println("결핵진단서 미제출.");
-                        return false;
+                        applicationDTO.setResult("No");
                     }
                 }
             }
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
-
-        return false; // 조회된 데이터가 없다면 미제출로 간주
+        return applicationDTO.getResult();
     }
 
     // 생활관 비용 납부자&미납부자 생활관 별로 조회

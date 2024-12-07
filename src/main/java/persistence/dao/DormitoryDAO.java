@@ -12,7 +12,7 @@ public class DormitoryDAO {
     private final Connection connection;
     public DormitoryDAO(Connection connection) { this.connection = connection;}
 
-    // 선발 일정 등록 함수
+    // 이벤트 등록 함수
     public void eventRegistration(int id, LocalDateTime startDate, LocalDateTime endDate, String eventName, LocalDate writedDate) {
 
         String query = "INSERT INTO event_schedule (user_id, start_date, end_date, event_name, writed_date) " + "VALUES (?, ?, ?, ?, ?)";
@@ -45,15 +45,12 @@ public class DormitoryDAO {
             while (rs.next()) {
 
                 EventDTO eventDTO = new EventDTO();
-                UserDTO userDTO = new UserDTO();
 
                 eventDTO.setStartDate(rs.getTimestamp("start_date").toLocalDateTime());
                 eventDTO.setEndDate(rs.getTimestamp("end_date").toLocalDateTime());
                 eventDTO.setEventName(rs.getString("event_name"));
                 eventDTO.setWritedDate(rs.getDate("writed_date").toLocalDate());
-                userDTO.setName(rs.getString("name"));
-
-                eventDTO.setUserDTO(userDTO);
+                eventDTO.setName(rs.getString("name"));
 
                 eventList.add(eventDTO);  // 조회된 EventDTO를 리스트에 추가
             }
