@@ -24,9 +24,10 @@ public class CheckInDAO {
     public CheckInDAO(Connection connection) {this.connection = connection;}
 
     // 입사 신청 정보 등록 함수
-    public void submitApplication(int dormitoryId, int id, int preference, int mealFrequency, LocalDate applicationDate , boolean isSnoring) {
+   public void submitApplication(int dormitoryId, int id, int preference, int mealFrequency, boolean isSnoring) {
 
-        String insertQuery = "INSERT INTO application (dormitory_id, student_id, preference, application_status ,meal_frequency, application_date) " + "VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO application (dormitory_id, student_id, preference, application_status ,meal_frequency, application_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
         ApplicationDTO.ApplicationStatus status = ApplicationDTO.ApplicationStatus.대기;
 
@@ -36,10 +37,11 @@ public class CheckInDAO {
             stmt.setInt(3, preference);
             stmt.setString(4, status.name());
             stmt.setInt(5, mealFrequency);
-            stmt.setObject(6, applicationDate);
+
+            // 현재 시간 삽입
+            stmt.setObject(6, LocalDate.now());  // LocalDateTime.now()로 현재 날짜와 시간 삽입
 
             stmt.executeUpdate();
-
 
             String updateQuery = "UPDATE student SET is_snoring = ? WHERE id = ?";
 
@@ -50,9 +52,11 @@ public class CheckInDAO {
                 stmt2.executeUpdate();
             }
 
-        } catch (SQLException e) {System.out.println("error: " + e);}
+        } catch (SQLException e) {
+            System.out.println("error: " + e);
+        }
     }
-
+    
     // 입사신청자 정보 목록 전송 함수
     public ArrayList<ApplicationListDTO> getApplicationList() {
 
