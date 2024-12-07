@@ -225,6 +225,42 @@ public class ClientController {
         }
     }
 
+    public void viewPassed() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.ROOM_ASSIGNMENT_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.ROOM_ASSIGNMENT_QUERY) {
+                        int dataCount = Deserializer.byteArrayToInt(readBuf);
+                        for (int i = 0; i < dataCount; i++) {
+                            if (dis.read(readBuf) != -1) {
+                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                send_ack();
+                            }
+                        }
+                        viewer.viewPassed(ApplicationListDTOs);
+                    }
+                }
+            }
+        }
+    }
+
     public void viewPayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
         ArrayList<paymentListDTO> paymentListDTOs = new ArrayList<>();
@@ -234,7 +270,7 @@ public class ClientController {
 
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
-            if (protocol.getCode() == ProtocolCode.PAID_APPLICANT_QUERY) {
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
                 int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
@@ -270,7 +306,7 @@ public class ClientController {
 
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
-            if (protocol.getCode() == ProtocolCode.PAID_APPLICANT_QUERY) {
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
                 int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
@@ -297,18 +333,16 @@ public class ClientController {
         }
     }
 
-    TUBERCULOSIS_CERTIFICATE_QUERY
-
     public void viewTuberculosisCertificater() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<ApplicationDTO> ApplicationDTOs = new ArrayList<>();
+        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
-            if (protocol.getCode() == ProtocolCode.TUBERCULOSIS_CERTIFICATE_QUERY) {
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
                 int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
@@ -324,11 +358,54 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                ApplicationDTOs.add((ApplicationDTO) new Protocol(readBuf).getData());
+                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewApplicationDTOs(ApplicationDTOs);
+                        viewer.viewApplicationListDTOs(ApplicationListDTOs);
+                    }
+                }
+            }
+        }
+    }
+
+    public void viewCheck_out_ApplicantAndRequest() throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+        ArrayList<CheckOutDTO> CheckOutDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
+                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                Protocol respondDormitory_id = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.WITHDRAWAL_APPLICANT_QUERY,
+                        Dormitory_id.getBytes(),
+                        Dormitory_id
+                );
+                dos.write(respondDormitory_id.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.WITHDRAWAL_APPLICANT_QUERY) {
+                        int Student_id = viewer.getStudent_id();
+                        Protocol respondStudent_id = new Protocol(
+                                ProtocolType.RESPOND,
+                                ProtocolCode.WITHDRAWAL_APPLICANT_QUERY,
+                                Student_id.getBytes(),
+                                Student_id
+                        );
+                        dos.write(respondStudent_id.getBytes());
+                        if (dis.read(readBuf) != -1) {
+                            if (response.getCode() == ProtocolCode.SUCCESS) {
+                                System.out.println("성공");
+                            }else{
+                                System.out.println("환불 대상자가 아닙니다.");
+                            }
+                        }
                     }
                 }
             }

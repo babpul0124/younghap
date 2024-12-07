@@ -62,11 +62,11 @@ public class Client {
         final int DORMITORY_FEE_AND_MEAL_REGIST_REQUEST = 2;
         final int APPLICATION_VIEW = 3;
         final int SELECTION_AND_ALLOCATION_OF_ROOMS_REQUEST = 4;
-        final int VIEW_PASSED = 5;
+        final int PASSED_VIEW = 5;
         final int PAYERS_FOR_DORMITORY_FEE_VIEW = 6;
         final int UNPAYERS_FOR_DORMITORY_FEE_VIEW = 7;
         final int SUBMITTER_OF_TUBERCULOSIS_CERTIFICATE_VIEW = 8;
-        final int CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST = 9;
+        final int CHECK_OUT_APPLICANT_VIEW_AND_REQUEST = 9;
         final int LOGOUT = 10;
 
         while(login) {
@@ -90,19 +90,24 @@ public class Client {
                     con.requestSelectionAndAllocationOfRooms();
                     break;
 
+                case PASSED_VIEW:
+                    con.viewPassed();
+                    break;
+
                 case PAYERS_FOR_DORMITORY_FEE_VIEW:
-                    con.viewPayersForDormitoryFee(me);
+                    con.viewPayersForDormitoryFee();
                     break;
 
                 case UNPAYERS_FOR_DORMITORY_FEE_VIEW:
-                    con.viewUnpayersForDormitoryFee(me);
+                    con.viewUnpayersForDormitoryFee();
                     break;
 
                 case SUBMITTER_OF_TUBERCULOSIS_CERTIFICATE_VIEW:
                     con.viewTuberculosisCertificater();
                     break;
 
-                case CHECK_OUT_APPLICATOR_VIEW_AND_CHECK_OUT_REQUEST:
+                case CHECK_OUT_APPLICANT_VIEW_AND_REQUEST:
+                    con.viewCheck_out_ApplicantAndRequest();
                     break;
 
                 case LOGOUT:

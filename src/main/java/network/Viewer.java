@@ -149,11 +149,18 @@ public class Viewer {
         System.out.println();
     }
 
-    public void viewApplicationDTOs(ArrayList<ApplicationDTO> DTOs) {
+    public void viewPassed(ArrayList<ApplicationListDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            System.out.println("[" + i + "] " + DTOToString.ApplicationDTOToString(DTOs.get(i)));
+            if(DTOs.get(i).getApplicationDTO().getApplicationStatus().equals(ApplicationDTO.ApplicationStatus.승인)){
+                System.out.println("[" + i + "] " + DTOToString.ApplicationListDTOToString(DTOs.get(i)));
+            }
         }
         System.out.println();
+    }
+
+    public int getStudent_id() throws IOException {
+        System.out.println("환불할 거주자의 학번 입력: ");
+        return Integer.parseInt(keyInput.readLine());
     }
 
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
