@@ -14,7 +14,10 @@ public class DormitoryDTO
     int roomCapacityNum;
     int dormitoryFee;
 
+    int roomNum;
+    int bedName;
     int personalRoomId;
+
     int id;
 
     int mealFrequency;
