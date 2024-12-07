@@ -163,6 +163,20 @@ public class Viewer {
         return Integer.parseInt(keyInput.readLine());
     }
 
+    public int getSelectScheduleOrCost() throws IOException {
+        System.out.println("[1] 선발 일정 조회");
+        System.out.println("[2] 기숙사 비용 조회");
+        System.out.println("입력: ");
+        return Integer.parseInt(keyInput.readLine());
+    }
+
+    public void viewEventDTO(ArrayList<EventDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.viewEventDTOToString(DTOs.get(i)));
+        }
+        System.out.println();
+    }
+
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
         viewStoreDTOs(storeDTOs);
         StoreDTO storeInfo = null;

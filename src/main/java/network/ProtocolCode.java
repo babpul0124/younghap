@@ -32,4 +32,6 @@ public class ProtocolCode {
   static final byte RESPONSE_SCHEDULE = 0x1C;        // 선발 일정 등록
   static final byte RESPONSE_FEE_INFO = 0x1D;        // 사용료 및 급식비 정보
   static final byte RESPONSE_FEE = 0x1E;             // 사용료 및 급식비 등록
+  static final byte SCHEDULE_QUERY = 0x1F;
+  static final byte COST_QUERY = 0x20;
 }

@@ -412,6 +412,68 @@ public class ClientController {
         }
     }
 
+    public void viewEvent_schedule() throws IOException {
+        ArrayList<EventDTO> EventDTOs = new ArrayList<>();
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SCHEDULE_COST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.SCHEDULE_COST_QUERY) {
+                int selectScheduleOrCost = viewer.getSelectScheduleOrCost();
+                if(selectScheduleOrCost == 1){
+                    Protocol respondMenu = new Protocol(
+                            ProtocolType.RESPOND,
+                            ProtocolCode.SCHEDULE_QUERY,
+                            selectScheduleOrCost.getBytes(),
+                            selectScheduleOrCost
+                    );
+                    dos.write(respondMenu.getBytes());
+
+                    if (dis.read(readBuf) != -1) {
+                        Protocol response = new Protocol(readBuf);
+                        if (response.getCode() == ProtocolCode.SCHEDULE_QUERY) {
+                            int dataCount = Deserializer.byteArrayToInt(readBuf);
+                            for (int i = 0; i < dataCount; i++) {
+                                if (dis.read(readBuf) != -1) {
+                                    EventDTOs.add((EventDTO) new Protocol(readBuf).getData());
+                                    send_ack();
+                                }
+                            }
+                            viewer.viewEventDTOs(EventDTOs);
+                        }
+                    }
+                }else if(selectScheduleOrCost == 2){
+                    Protocol respondMenu = new Protocol(
+                            ProtocolType.RESPOND,
+                            ProtocolCode.COST_QUERY,
+                            selectScheduleOrCost.getBytes(),
+                            selectScheduleOrCost
+                    );
+                    dos.write(respondMenu.getBytes());
+
+                    if (dis.read(readBuf) != -1) {
+                        Protocol response = new Protocol(readBuf);
+                        if (response.getCode() == ProtocolCode.COST_QUERY) {
+                            int dataCount = Deserializer.byteArrayToInt(readBuf);
+                            for (int i = 0; i < dataCount; i++) {
+                                if (dis.read(readBuf) != -1) {
+                                    DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
+                                    send_ack();
+                                }
+                            }
+                            viewer.viewDormitoryDTOs(DormitoryDTOs);
+                        }
+                    }
+                }else{
+                    System.out.println("잘못된 선택입니다.");
+                }
+            }
+        }
+    }
+
     public ArrayList<ApplicationDTO> getAllApplicationDTO(ApplicationDTO info) throws IOException {
         Protocol requestAllApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.APPLICATION, 0, info);
         dos.write(requestAllApplicationDTOs.getBytes());

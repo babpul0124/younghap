@@ -124,7 +124,7 @@ public class Client {
 
     private void studentRun() throws IOException {
         boolean login = true;
-        final int EVENT_SCHEDULE_REGIST_VIEW = 1;
+        final int EVENT_SCHEDULE_VIEW = 1;
         final int APPLICATION_REGIST_REQUEST = 2;
         final int PASSED_VIEW = 3;
         final int DORMITORY_FEE_VIEW_AND_PAY_REQUEST = 4;
@@ -138,8 +138,8 @@ public class Client {
 
             int option = Integer.parseInt(keyInput.readLine());
             switch (option) {
-                case EVENT_SCHEDULE_REGIST_VIEW:
-                    con.modificationUser(me);
+                case EVENT_SCHEDULE_VIEW:
+                    con.viewEvent_schedule();
                     break;
 
                 case APPLICATION_REGIST_REQUEST:
