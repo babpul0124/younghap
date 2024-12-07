@@ -442,7 +442,7 @@ public class ClientController {
                                     send_ack();
                                 }
                             }
-                            viewer.viewEventDTOs(EventDTOs);
+                            viewer.viewEventDTO(EventDTOs);
                         }
                     }
                 }else if(selectScheduleOrCost == 2){
@@ -474,6 +474,46 @@ public class ClientController {
         }
     }
 
+    public void requestApplicationRegist(UserDTO me) throws IOException {
+        ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
+
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.COST_QUERY, 0, null);
+        dos.write(viewRequest.getBytes());
+
+        if (dis.read(readBuf) != -1) {
+            Protocol protocol = new Protocol(readBuf);
+            if (protocol.getCode() == ProtocolCode.COST_QUERY) {
+                int dataCount = Deserializer.byteArrayToInt(readBuf);
+                for (int i = 0; i < dataCount; i++) {
+                    if (dis.read(readBuf) != -1) {
+                        DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
+                        send_ack();
+                    }
+                }
+                viewer.viewDormitoryDTOs(DormitoryDTOs);
+                String[] applicationInfo = viewer.applicationInfo(me);
+                Protocol respondApplicationInfo = new Protocol(
+                        ProtocolType.RESPOND,
+                        ProtocolCode.RESPONSE_APPLICATION_INFO,
+                        applicationInfo.getBytes(),
+                        applicationInfo
+                );
+                dos.write(respondApplicationInfo.getBytes());
+
+                if (dis.read(readBuf) != -1) {
+                    Protocol response = new Protocol(readBuf);
+                    if (response.getCode() == ProtocolCode.SUCCESS) {
+                        System.out.println("신청 완료");
+                    }
+                }else{
+                    System.out.println("중복 신청");
+                }
+            }else{
+                System.out.println("신청 기간 아님");
+            }
+        }
+    }
+
     public ArrayList<ApplicationDTO> getAllApplicationDTO(ApplicationDTO info) throws IOException {
         Protocol requestAllApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.APPLICATION, 0, info);
         dos.write(requestAllApplicationDTOs.getBytes());
@@ -494,264 +534,9 @@ public class ClientController {
         return DTOs;
     }
 
-    public ArrayList<DormitoryDTO> getDormitoryDTO() throws IOException {
-        Protocol requestAllDormitoryDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORMITORY, 0, null);
-        dos.write(requestAllDormitoryDTOs.getBytes());
-
-        ArrayList<DormitoryDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<ApplicationDTO> getSearchedApplicationDTO(DTO dormitory) throws IOException {
-        Protocol requestSearchedApplicationDTOs = new Protocol(ProtocolType.REQUEST, ProtocolCode.SearchedApplication, 0, dormitory);
-        dos.write(requestSearchedApplicationDTOs.getBytes());
-        //dormitory에 해당하는 모든 Orders 리스트를 가져옴
-
-        ArrayList<ApplicationDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((ApplicationDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<StoreDTO> getAllStoreDTO() throws IOException {
-        Protocol searchStoreInfo = new Protocol(ProtocolType.SEARCH, ProtocolCode.STORE, 0, null);
-        dos.write(searchStoreInfo.getBytes());
-
-        ArrayList<StoreDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((StoreDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
     private void send_ack() throws IOException {
         Protocol protocol = new Protocol(ProtocolType.RESPONSE, ProtocolCode.ACK, 0, null);
         dos.write(protocol.getBytes());
-    }
-
-
-
-    public ArrayList<StoreDTO> getAllStoreDTO(DTO info) throws IOException {
-        Protocol requestAllMyStoreDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.STORE, 0, info);
-        dos.write(requestAllMyStoreDTOs.getBytes());
-        //info에 해당하는 모든 Store 리스트를 가져옴
-
-        ArrayList<StoreDTO> DTOs = new ArrayList<>();
-
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((StoreDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<MenuDTO> getAllMenuDTO() throws IOException {
-        Protocol searchMenuInfo = new Protocol(ProtocolType.SEARCH, ProtocolCode.MENU, 0, null);
-        dos.write(searchMenuInfo.getBytes());
-
-        ArrayList<MenuDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((MenuDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public <T> ArrayList<MenuDTO> getAllMenuDTO(T info) throws IOException {
-        Protocol requestAllMyMenuDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.MENU, 0, (DTO) info);
-        dos.write(requestAllMyMenuDTOs.getBytes());
-        //info가 지닌 모든 menu 리스트를 가져옴
-
-        ArrayList<MenuDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((MenuDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public <T> ArrayList<DetailsDTO> getAllOptionDTO(T info) throws IOException {
-        Protocol requestAllMyOptionDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.OPTION, 0, (DTO) info);
-        dos.write(requestAllMyOptionDTOs.getBytes());
-        //info가 지닌 모든 DetailsDTO 리스트를 가져옴
-
-        ArrayList<DetailsDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((DetailsDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<ClassificationDTO> getAllClassificationDTO() throws IOException {
-        Protocol requestAllMyClassificationDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.CLASSIFICATION, 0, null);
-        dos.write(requestAllMyClassificationDTOs.getBytes());
-        //모든 카테고리DTO 리스트를 가져옴
-
-        ArrayList<ClassificationDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((ClassificationDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public <T> ArrayList<ClassificationDTO> getAllClassificationDTO(T info) throws IOException {
-        Protocol requestAllMyClassificationDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.CLASSIFICATION, 0, (DTO) info);
-        dos.write(requestAllMyClassificationDTOs.getBytes());
-        //info가 지닌 모든 카테고리DTO 리스트를 가져옴
-
-        ArrayList<ClassificationDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            if (dis.read(readBuf) != -1) {
-                DTOs.add((ClassificationDTO) new Protocol(readBuf).getData());
-                send_ack();
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<UserDTO> getAllOwnerDTO() throws IOException {
-        Protocol requestAllUserDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.USER, 0, null);
-        dos.write(requestAllUserDTOs.getBytes());
-
-        ArrayList<UserDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-        if (dis.read(readBuf) != -1) {
-            listLength = Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            UserDTO cur = null;
-
-            if (dis.read(readBuf) != -1) {
-                cur = (UserDTO) new Protocol(readBuf).getData();
-                send_ack();
-            }
-
-            String curAuthority = cur.getAuthorityEnum().getName();
-            if (curAuthority.equals("OWNER")) {
-                DTOs.add(cur);
-            }
-        }
-
-        return DTOs;
-    }
-
-    public ArrayList<UserDTO> getAllOwnerAndUserDTO() throws IOException {
-        Protocol requestAllUserDTOs = new Protocol(ProtocolType.SEARCH, ProtocolCode.USER, 0, null);
-        dos.write(requestAllUserDTOs.getBytes());
-
-        ArrayList<UserDTO> DTOs = new ArrayList<>();
-        int listLength = 0;
-
-        if (dis.read(readBuf) != -1) {
-            Deserializer.byteArrayToInt(readBuf);
-            send_ack();
-        }
-
-        for(int i = 0; i < listLength; i++) {
-            UserDTO cur = null;
-            if (dis.read(readBuf) != -1) {
-                cur = (UserDTO) new Protocol(readBuf).getData();
-                send_ack();
-            }
-
-            String curAuthority = cur.getAuthorityEnum().getName();
-            if (curAuthority.equals("OWNER") || curAuthority.equals("USER")) {
-                DTOs.add(cur);
-            }
-        }
-
-        return DTOs;
     }
 
     public void registOwnerDetermination() throws IOException {

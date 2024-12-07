@@ -143,7 +143,7 @@ public class Client {
                     break;
 
                 case APPLICATION_REGIST_REQUEST:
-                    con.viewStore();
+                    con.requestApplicationRegist(me);
                     break;
 
                 case PASSED_VIEW:

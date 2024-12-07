@@ -177,6 +177,23 @@ public class Viewer {
         System.out.println();
     }
 
+    public String[] applicationInfo(UserDTO me) throws IOException {
+        String[] result = new String[5];
+
+        result[0] = me.getId() + ""; //학번
+        System.out.println("[입사 신청 정보 입력]");
+        System.out.print("생활관 ID: ");
+        result[1] = keyInput.readLine();
+        System.out.print("지망: ");
+        result[2] = keyInput.readLine();
+        System.out.print("식사 유형 (n일식): ");
+        result[3] = keyInput.readLine();
+        System.out.print("코골이 여부: ");
+        result[4] = keyInput.readLine();
+
+        return result;
+    }
+
     public StoreDTO selectStore(ArrayList<StoreDTO> storeDTOs) throws IOException {
         viewStoreDTOs(storeDTOs);
         StoreDTO storeInfo = null;
