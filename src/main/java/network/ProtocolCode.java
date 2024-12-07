@@ -1,7 +1,7 @@
 package network;
 
 public class ProtocolCode {
-  static final byte SUCCESS = 0x01;                  // 성공
+  static final byte SUCCESS = 0x0;                  // 성공
   static final byte FAILURE = 0x02;                  // 실패
 
   static final byte CONNECT = 0x03;                   // 접속
