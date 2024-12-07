@@ -286,7 +286,7 @@ public class CheckInDAO {
     }
 
     //결핵 진단서 제출 확인
-    static public String checkStudentImageSubmitted(int id) {
+    public String checkStudentImageSubmitted(int id) {
         String query = "SELECT image FROM application WHERE student_id = ?"; // application 테이블에서 image 조회
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
