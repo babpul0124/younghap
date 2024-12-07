@@ -147,22 +147,23 @@ public class Client {
                     break;
 
                 case PASSED_VIEW:
-                    con.registOrder(me);
+                    con.viewPassed(me);
                     break;
 
                 case DORMITORY_FEE_VIEW_AND_PAY_REQUEST:
-                    con.orderCancel(me);
+                    con.viewDormitoryFeeAndRequestPay(me);
                     break;
 
                 case SUBMIT_TUBERCULOSIS_CERTIFICATE_REQUEST:
-                    con.viewOrder(me);
+                    con.requestSumitTuberculosisCertificate(me);
                     break;
 
                 case CHECK_OUT_APPLICATION_REQUEST:
-                    con.registReview(me);
+                    con.requestCheck_out(me);
                     break;
 
                 case CHECK_OUT_STATUS_VIEW:
+                    con.viewCheck_out(me);
                     break;
 
                 case LOGOUT:
