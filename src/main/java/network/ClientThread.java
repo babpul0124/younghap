@@ -65,36 +65,42 @@ public class ClientThread extends Thread {
 
         // 요청 타입에 따라 분기 처리
         switch (type) {
-            case "0x01": // 접속
+            case "0x01": // 요청
                 processType0x01(code, data);
                 break;
-            case "0x02": // 요청
+            case "0x02": // 응답
                 processType0x02(code, data);
                 break;
-            case "0x03": // 응답
+            case "0x03": // 결과
                 processType0x03(code, data);
-                break;
-            case "0x04": // 전송
-                processType0x04(code, data);
-                break;
-            case "0x05": // 결과
-                processType0x05(code, data);
                 break;
             default:
                 sendResponse("ERROR: Invalid type");
         }
     }
 
-    // 메시지 타입 0x01 처리 (접속)
     private void processType0x01(String code, String data) {
-        // 접속 시 ID와 PWD 확인
-        if ("0x01".equals(code)) { // 접속 코드
-            handleLogin(data);
-        } else {
-            sendResponse("ERROR: Invalid code for type 0x01");
-        }
+        // 0x01 요청 처리 로직
+        System.out.println("Processing request 0x01 with code: " + code + " and data: " + data);
+        // 응답 보내기 예시
+        sendResponse("Processed request 0x01");
     }
-    //로그인 끝O
+
+    private void processType0x02(String code, String data) {
+        // 0x02 응답 처리 로직
+        System.out.println("Processing response 0x02 with code: " + code + " and data: " + data);
+        // 응답 보내기 예시
+        sendResponse("Processed response 0x02");
+    }
+
+    private void processType0x03(String code, String data) {
+        // 0x03 결과 처리 로직
+        System.out.println("Processing result 0x03 with code: " + code + " and data: " + data);
+        // 응답 보내기 예시
+        sendResponse("Processed result 0x03");
+    }
+
+    //로그인
     private void handleLogin(String data) {
         String[] credentials = data.split(",");
         String username = credentials[0];
@@ -117,40 +123,12 @@ public class ClientThread extends Thread {
             sendResponse("FAILURE: Invalid username or password");
         }
     }
-
-    // 메시지 타입 0x02 처리 (요청)
-    private void processType0x02(String code, String data) {
-        switch (code) {
-            case "0x02": // 선발 일정 및 비용 조회
-                handleSelectionScheduleAndCost();
-                break;
-            case "0x03": // 입사 신청
-                handleCheckIn(data);
-                break;
-            case "0x04": // 합격 여부 및 호실 조회
-                handleRoomAssignment(data);
-                break;
-            case "0x05": // 합격 생활관 비용 조회
-                handleDormitoryCost(data);
-                break;
-            case "0x06": // 결핵진단서 제출
-                handleTBTestSubmission(data);
-                break;
-            case "0x07": // 퇴사 신청
-                handleCheckOut(data);
-                break;
-            case "0x08": // 환불 조회
-                handleRefund(data);
-                break;
-            default:
-                sendResponse("ERROR: Invalid code for type 0x02");
-        }
-    }
-
+    // 선발 일정 및 비용 조회
     private void handleSelectionScheduleAndCost() {
         // 선발 일정 및 비용 조회 로직 추가
         sendResponse("SELECTION SCHEDULE AND COST: Details...");
     }
+
     //입사
     private void handleCheckIn(String data) {
         try {
@@ -285,41 +263,6 @@ public class ClientThread extends Thread {
             sendResponse("ERROR: Unable to process refund.");
         }
     }
-
-    // 메시지 타입 0x03 처리 (응답)
-    private void processType0x03(String code, String data) {
-        // 응답을 클라이언트에 맞게 처리
-        if ("0x03".equals(code)) {
-            sendResponse("CHECK-IN RESPONSE: " + data);
-        } else {
-            sendResponse("ERROR: Invalid code for type 0x03");
-        }
-    }
-
-    // 메시지 타입 0x04 처리 (전송)
-    private void processType0x04(String code, String data) {
-        // 전송된 데이터를 처리
-        if ("0x03".equals(code)) {
-            sendResponse("TB Test Document: " + data);
-        } else {
-            sendResponse("ERROR: Invalid code for type 0x04");
-        }
-    }
-
-    // 메시지 타입 0x05 처리 (결과)
-    private void processType0x05(String code, String data) {
-        switch (code) {
-            case "0x01": // 성공
-                sendResponse("SUCCESS: " + data);
-                break;
-            case "0x02": // 실패
-                sendResponse("FAILURE: " + data);
-                break;
-            default:
-                sendResponse("ERROR: Invalid code for type 0x05");
-        }
-    }
-
     private void sendResponse(String message) {
         try {
             dos.writeUTF(message); // UTF-8로 문자열을 전송
