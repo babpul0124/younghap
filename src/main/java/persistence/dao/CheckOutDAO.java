@@ -11,6 +11,7 @@ import persistence.dto.CheckOutDTO;
 import persistence.dto.UserCheckOutResultDTO;
 
 public class CheckOutDAO {
+
     private final Connection connection;
     public CheckOutDAO(Connection connection) {this.connection = connection;}
 
