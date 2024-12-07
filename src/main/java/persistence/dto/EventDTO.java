@@ -11,12 +11,12 @@ import lombok.Setter;
 @Setter
 public class EventDTO
 {
+    int id;
+    String name;
     LocalDateTime startDate;
     LocalDateTime endDate;
     String eventName;
     LocalDate writedDate;
-    UserDTO userDTO;
-
     LocalDate checkInDate;
     LocalDate originalCheckOutDate;
 }

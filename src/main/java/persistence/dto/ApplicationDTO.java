@@ -9,11 +9,16 @@ import lombok.Setter;
 @Setter
 public class ApplicationDTO
 {
+
     public enum ApplicationStatus {대기, 승인, 탈락} // enum이라는 함수 선언
     enum CheckOutStatus {환불대기, 퇴실}
     enum IsPayment {미납부, 납부}
 
     int applicationId;
+
+    int dormitoryId;
+    int id;
+    int mealFrequency;
 
     int preference;
     ApplicationStatus applicationStatus;
@@ -28,5 +33,5 @@ public class ApplicationDTO
     CheckOutStatus checkOutStatus;
     IsPayment isPayment;
 
-
+    String result;
 }
