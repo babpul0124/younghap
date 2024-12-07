@@ -54,11 +54,11 @@ public class CheckInDAO {
     }
 
     // 입사신청자 정보 목록 전송 함수
-    public ArrayList<ApplicationListDTO> getApplicationList() {
+   public ArrayList<ApplicationListDTO> getApplicationList() {
 
         ArrayList<ApplicationListDTO> applicationList = new ArrayList<>();
 
-        String query = "SELECT a.application_id, a.student_id, u.name, d.dormitory_name, d.room_capacity_num, d.dormitory_id " +
+        String query = "SELECT a.application_id, a.student_id, u.name, d.dormitory_name, d.room_capacity_num, d.dormitory_id, a.applicationStatus " +
                 "FROM application a " +
                 "JOIN user u ON a.student_id = u.id " +
                 "JOIN dormitory d ON a.dormitory_id = d.dormitory_id";
@@ -74,6 +74,10 @@ public class CheckInDAO {
                 String dormitoryName = rs.getString("dormitory_name");
                 int roomCapacityNum = rs.getInt("room_capacity_num");
 
+                String applicationStatusStr = rs.getString("applicationStatus");
+                ApplicationDTO.ApplicationStatus applicationStatus = ApplicationDTO.ApplicationStatus.valueOf(applicationStatusStr);
+
+
                 // 관련 DTO 객체 생성 및 데이터 세팅
                 DormitoryDTO dormitoryDTO = new DormitoryDTO();
                 dormitoryDTO.setDormitoryId(dormitoryId);
@@ -86,6 +90,7 @@ public class CheckInDAO {
 
                 ApplicationDTO applicationDTO = new ApplicationDTO();
                 applicationDTO.setApplicationId(applicationId);
+                applicationDTO.setApplicationStatus(applicationStatus); 
 
                 ApplicationListDTO applicationListDTO = new ApplicationListDTO(dormitoryDTO, userDTO, applicationDTO);
 
