@@ -1,5 +1,6 @@
 package network;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class Serializer {
     return byteListToArray(result);
   }
 
+
   public static byte[] makeBody(Object obj) throws Exception {
     Class<?> c = obj.getClass();
     Field[] fields = c.getDeclaredFields();
@@ -60,20 +62,21 @@ public class Serializer {
   }
 
   private static byte[] serializeField(Object fieldValue) throws Exception {
-    byte[] result = null;
-
-    if (fieldValue instanceof Integer) {
-      result = intToByteArray((Integer) fieldValue);
-    } else if (fieldValue instanceof Long) {
-      result = longToByteArray((Long) fieldValue);
-    } else if (fieldValue instanceof String) {
-      result = stringToByteArray((String) fieldValue);
-    } else {
-      // 다른 타입의 처리 (예: 객체 내부의 객체)
-      result = getBytes(fieldValue);
+    if (fieldValue == null) {
+      return new byte[]{0}; // null 처리
     }
 
-    return result;
+    if (fieldValue instanceof Integer) {
+      return intToByteArray((Integer) fieldValue);
+    } else if (fieldValue instanceof Long) {
+      return longToByteArray((Long) fieldValue);
+    } else if (fieldValue instanceof String) {
+      return stringToByteArray((String) fieldValue);
+    } else if (fieldValue instanceof Serializable) {
+      return getBytes(fieldValue); // 객체가 Serializable일 경우 재귀 호출
+    } else {
+      throw new Exception("Cannot serialize field: " + fieldValue.getClass().getName());
+    }
   }
 
   public static byte[] intToByteArray(int val) {
