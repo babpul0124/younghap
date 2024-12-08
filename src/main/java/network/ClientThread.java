@@ -1,5 +1,6 @@
 package network;
 
+import com.mysql.cj.protocol.Protocol;
 import service.*;
 import persistence.dto.*;
 import persistence.dao.*;
@@ -7,7 +8,19 @@ import persistence.dao.*;
 import java.io.*;
 import java.net.Socket;
 
-public class ClientThread implements Runnable {
+public class ClientThread extends Thread {
+    private DataInputStream dis;
+    private DataOutputStream dos;
+
+    private InputStream is;
+    private OutputStream os;
+    private BufferedReader br;
+    private BufferedWriter bw;
+
+    private final int BUF_SIZE = 1024;
+    private byte[] readBuf = new byte[BUF_SIZE];
+    private Protocol send_protocol;
+
     private final Socket clientSocket;
     private final UserService userService;
     private final Viewer viewer;
@@ -21,10 +34,10 @@ public class ClientThread implements Runnable {
     @Override
     public void run() {
         try (
-                InputStream input = clientSocket.getInputStream();
-                OutputStream output = clientSocket.getOutputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                PrintWriter writer = new PrintWriter(output, true)
+                InputStream is = clientSocket.getInputStream();
+                OutputStream os = clientSocket.getOutputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                PrintWriter writer = new PrintWriter(os, true)
         ) {
             writer.println("클라이언트에 연결되었습니다.");
 
@@ -34,7 +47,7 @@ public class ClientThread implements Runnable {
                 int choice = Integer.parseInt(reader.readLine());
 
                 if (choice == 1) {
-                    handleLogin(reader, writer);
+                    handleLogin(reader, writer);  // 로그인 처리
                 } else if (choice == 2) {
                     writer.println("프로그램을 종료합니다.");
                     clientSocket.close();
@@ -59,10 +72,8 @@ public class ClientThread implements Runnable {
         String role = userService.validateUser(loginId, password);
 
         if ("학생".equals(role)) {
-            writer.println("로그인 성공: 학생으로 접속합니다.");
             handleStudentActions(reader, writer);
         } else if ("관리자".equals(role)) {
-            writer.println("로그인 성공: 관리자로 접속합니다.");
             handleManagerActions(reader, writer);
         } else {
             writer.println("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.");
