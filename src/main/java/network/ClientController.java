@@ -178,8 +178,7 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                DormitoryDTO dormitoryDTO = new DormitoryDTO();
-                dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.DORM_APPLICANT_QUERY,
@@ -219,7 +218,7 @@ public class ClientController {
 
     public void viewPassed() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -227,12 +226,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.ROOM_ASSIGNMENT_QUERY,
-                        Integer.BYTES,
-                        Dormitory_id
+                        0,
+                        dormitoryDTO
                 );
                 dos.write(respondDormitory_id.getBytes());
 
@@ -242,11 +241,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewPassed(ApplicationListDTOs);
+                        viewer.viewPassed(CheckInDTOs);
                     }
                 }
             }
@@ -255,7 +254,7 @@ public class ClientController {
 
     public void viewPayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -263,12 +262,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.PAID_APPLICANT_QUERY,
-                        Integer.BYTES,
-                        Dormitory_id
+                        0,
+                        dormitoryDTO
                 );
                 dos.write(respondDormitory_id.getBytes());
 
@@ -278,7 +277,7 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
