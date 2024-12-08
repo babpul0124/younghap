@@ -7,9 +7,9 @@ import java.sql.*;
 public class DBConnection {
     private static Connection conn = null;
 
-    private static final String URL = "jdbc:mysql://127.0.0.1/domitory";
+    private static final String URL = "jdbc:mysql://192.168.56.1/domitory";
     private static final String USER = "root";  // 사용자명
-    private static final String PASSWORD = "jinchen0807!";  // 비밀번호
+    private static final String PASSWORD = "20230508";  // 비밀번호
 
     private DBConnection() { }
 
