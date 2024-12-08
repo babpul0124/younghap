@@ -9,7 +9,7 @@ import java.util.List;
 public class UserService {
     private LoginDAO loginDAO;
 
-    public UserService(LoginDAO loginDAO, CheckInDAO checkInDAO, CheckOutDAO checkOutDAO, DormitoryDAO dormitoryDAO){
+    public UserService(LoginDAO loginDAO){
         this.loginDAO = loginDAO;
     }
     // 사용자 로그인
