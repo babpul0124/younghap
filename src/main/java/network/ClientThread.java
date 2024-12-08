@@ -15,7 +15,7 @@ public class ClientThread extends Thread {
     private final Socket clientSocket;
     private final UserService userService;
     private final Viewer viewer;
-    
+
     private final int BUF_SIZE = 1024;
     private byte[] readBuf = new byte[BUF_SIZE];
     private Protocol send_protocol;
@@ -37,8 +37,11 @@ public class ClientThread extends Thread {
             bw = new PrintWriter(new OutputStreamWriter(os), true);
             dos = new DataOutputStream(os); // dos 초기화
 
-            // 로그인 처리
-            handleLogin();
+            while (is.read(readBuf) != -1) {
+                Protocol protocol = new Protocol(readBuf);
+
+                selectFunction(protocol);
+            }
 
         } catch (IOException e) {
             System.out.println("클라이언트와의 연결에 문제가 발생했습니다. " + e.getMessage());
