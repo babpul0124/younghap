@@ -1,8 +1,8 @@
 package network;
 
+import com.mysql.cj.protocol.Protocol;
 import service.*;
 import persistence.dto.*;
-import persistence.dao.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,64 +10,121 @@ import java.net.Socket;
 public class ClientThread extends Thread {
     private BufferedReader br;
     private PrintWriter bw;
+    private DataOutputStream dos; // DataOutputStream 추가
 
     private final Socket clientSocket;
     private final UserService userService;
     private final Viewer viewer;
+    private Protocol send_protocol;
 
     public ClientThread(Socket clientSocket, UserService userService, Viewer viewer) {
         this.clientSocket = clientSocket;
         this.userService = userService;
-        this.viewer = viewer;  // Viewer 초기화
+        this.viewer = viewer;
     }
 
     @Override
     public void run() {
         try {
-            // InputStream과 OutputStream을 설정
+            // InputStream과 OutputStream 초기화
             InputStream is = clientSocket.getInputStream();
             OutputStream os = clientSocket.getOutputStream();
 
-            // BufferedReader와 PrintWriter 설정
             br = new BufferedReader(new InputStreamReader(is));
             bw = new PrintWriter(new OutputStreamWriter(os), true);
+            dos = new DataOutputStream(os); // dos 초기화
 
             // 로그인 처리
-            handleLogin(br, bw);
+            handleLogin();
 
         } catch (IOException e) {
             System.out.println("클라이언트와의 연결에 문제가 발생했습니다. " + e.getMessage());
         }
     }
 
-    private void handleLogin(BufferedReader reader, PrintWriter writer) throws IOException {
-        // Viewer의 loginScreen() 메서드 사용
-        UserDTO userInfo = viewer.loginScreen(reader);
+    private void selectFunction(Protocol protocol) throws IOException {
+        byte type = protocol.getType();
+        byte code = protocol.getCode();
+        DTO data = protocol.getData();
 
-        String loginId = userInfo.getLoginId();
-        String password = userInfo.getPassword();
+        if (type == ProtocolType.REQUEST) { //요청
+            if (code == ProtocolCode.CONNECT) { //접속 요청
+                user_connection();
+            }
+            else if (code == ProtocolCode.ID_PWD) { //아이디, 비번 요청
+                user_login((UserDTO) data);
+            }
+            else {
+                System.out.println("알 수 없는 REQUEST 코드: " + code);
+            }
+        }
+        else if (type == ProtocolType.RESPOND) { //응답
+            if (code == ProtocolCode.ID_PWD) { //아이디, 비번 응답.
+                // 응답 처리
+            }
+        }
+        else if (type == ProtocolType.RESULT) { //결과
+            if(code == (ProtocolCode.ID_PWD | ProtocolCode.SUCCESS)){ //아이디, 비번 결과
+                user_login_accept();
+            }
+            else if(code == (ProtocolCode.ID_PWD | ProtocolCode.FAILURE)){ //아이디, 비번 결과
+                user_login_refuse();
+            }
+        } else {
+            System.out.println("알 수 없는 Protocol Type: " + type);
+        }
+    }
+
+    // 접속 요청을 처리하는 메서드
+    private void user_connection() throws IOException {
+        // Viewer에서 initScreen()을 통해 사용자의 선택을 받음
+        int userChoice = viewer.initScreen(br);
+
+        if (userChoice == 1) {
+            // 1번 선택 -> 로그인
+            handleLogin();
+        } else if (userChoice == 2) {
+            // 2번 선택 -> 종료
+            System.out.println("프로그램을 종료합니다.");
+            clientSocket.close();  // 클라이언트 연결 종료
+        } else {
+            System.out.println("잘못된 선택입니다. 다시 시도하세요.");
+            user_connection();  // 다시 선택 받기
+        }
+    }
+
+    private void handleLogin() throws IOException {
+        // Viewer의 loginScreen() 메서드 사용하여 로그인 정보 받기
+        UserDTO userInfo = viewer.loginScreen(br);
+
+        // 받은 로그인 정보로 인증
+        user_login(userInfo);
+    }
+
+    private void user_login(UserDTO userDTO) throws IOException {
+        String loginId = userDTO.getLoginId();
+        String password = userDTO.getPassword();
 
         // 로그인 인증
         String role = userService.validateUser(loginId, password);
 
         if ("학생".equals(role)) {
-            writer.println("로그인 성공: 학생으로 접속합니다.");
-            handleStudentActions(reader, writer);
+            // 성공: 학생으로 로그인
+            user_login_accept(userDTO);
         } else if ("관리자".equals(role)) {
-            writer.println("로그인 성공: 관리자로 접속합니다.");
-            handleManagerActions(reader, writer);
+            // 성공: 관리자로 로그인
+            user_login_accept(userDTO);
         } else {
-            writer.println("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.");
+            // 실패: 로그인 실패 처리
+            user_login_refuse(userDTO);
         }
     }
 
-    private void handleStudentActions(BufferedReader reader, PrintWriter writer) throws IOException {
-        // 학생 관련 작업을 여기에 구현합니다.
-        writer.println("학생 화면에 진입했습니다.");
+    private void user_login_accept(UserDTO userDTO) throws IOException {
+        // 로그인 성공 시 처리 로직
     }
 
-    private void handleManagerActions(BufferedReader reader, PrintWriter writer) throws IOException {
-        // 관리자 관련 작업을 여기에 구현합니다.
-        writer.println("관리자 화면에 진입했습니다.");
+    private void user_login_refuse(UserDTO userDTO) throws IOException {
+        // 로그인 실패 시 처리 로직
     }
 }
