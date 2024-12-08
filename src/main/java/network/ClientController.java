@@ -121,7 +121,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 DTOs.add((EventDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewEvent_scheduleDTOs(DTOs);
@@ -161,7 +160,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 DTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewDormitoryDTOs(DTOs);
@@ -199,7 +197,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewApplicationListDTOs(ApplicationListDTOs);
@@ -247,7 +244,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewPassed(ApplicationListDTOs);
@@ -283,7 +279,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewPaymentListDTOs(ApplicationListDTOs);
@@ -319,7 +314,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewUnpaymentListDTOs(ApplicationListDTOs);
@@ -355,7 +349,6 @@ public class ClientController {
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
                                 ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                                send_ack();
                             }
                         }
                         viewer.viewTuberculosisCertificaterList(ApplicationListDTOs);
@@ -434,7 +427,6 @@ public class ClientController {
                             for (int i = 0; i < dataCount; i++) {
                                 if (dis.read(readBuf) != -1) {
                                     EventDTOs.add((EventDTO) new Protocol(readBuf).getData());
-                                    send_ack();
                                 }
                             }
                             viewer.viewEventDTO(EventDTOs);
@@ -456,7 +448,6 @@ public class ClientController {
                             for (int i = 0; i < dataCount; i++) {
                                 if (dis.read(readBuf) != -1) {
                                     DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
-                                    send_ack();
                                 }
                             }
                             viewer.viewDormitoryDTOs(DormitoryDTOs);
@@ -482,7 +473,6 @@ public class ClientController {
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
                         DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
-                        send_ack();
                     }
                 }
                 viewer.viewDormitoryDTOs(DormitoryDTOs);
@@ -527,7 +517,6 @@ public class ClientController {
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
                         ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                        send_ack();
                     }
                 }
                 viewer.viewPassed(ApplicationListDTOs);
@@ -550,7 +539,6 @@ public class ClientController {
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
                         ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
-                        send_ack();
                     }
                 }
                 String ans = viewer.viewDormitoryFee(ApplicationListDTOs);
@@ -656,7 +644,6 @@ public class ClientController {
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
                         DTOs.add((CheckOutDTO) new Protocol(readBuf).getData());
-                        send_ack();
                     }
                 }
                 viewer.viewCheckOutDTOs(DTOs);
@@ -665,9 +652,4 @@ public class ClientController {
             }
         }
     }
-    private void send_ack() throws IOException {
-        Protocol protocol = new Protocol(ProtocolType.RESPONSE, ProtocolCode.ACK, 0, null);
-        dos.write(protocol.getBytes());
-    }
-
 }
