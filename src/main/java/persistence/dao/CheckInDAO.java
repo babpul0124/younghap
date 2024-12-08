@@ -11,7 +11,6 @@ import persistence.dto.ApplicationListDTO;
 
 import persistence.dto.DormitoryDTO;
 import persistence.dto.UserDTO;
-import persistence.dto.ApplicationStudentInfoDTO;
 import persistence.dto.StudentDormitoryInfoDTO;
 import persistence.dto.paymentListDTO;
 

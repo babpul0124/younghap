@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 
-public class DormitoryDTO
-{
+public class DormitoryDTO extends DTO{
     private int userId;
     private String userName;
     private String eventName;
