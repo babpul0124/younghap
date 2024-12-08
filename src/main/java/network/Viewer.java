@@ -112,15 +112,6 @@ public class Viewer {
         System.out.println();
     }
 
-    public int registMenuAndOptionScreen() throws IOException {
-        System.out.println("[1] 메뉴 등록");
-        System.out.println("[2] 옵션 등록");
-        System.out.println("[3] 분류 등록");
-        System.out.print("입력(범위 외 입력 시 종료) : ");
-
-        return Integer.parseInt(keyInput.readLine());
-    }
-
     public int getDormitory_id(ArrayList<DormitoryDTO> DTOs) throws IOException {
         viewDormitoryDTOs(DTOs);
         System.out.println("조회할 생활관 ID 입력: ");

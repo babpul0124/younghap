@@ -174,7 +174,7 @@ public class ClientController {
         }
     }
 
-    public void viewApplication() throws IOException {
+    public void viewApplicationList() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
         ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
 
