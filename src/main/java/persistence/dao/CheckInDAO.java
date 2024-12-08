@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import persistence.dto.CheckInDTO;
 
-
 public class CheckInDAO {
 
     private final Connection connection;

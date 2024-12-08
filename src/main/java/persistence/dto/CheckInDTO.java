@@ -29,5 +29,6 @@ public class CheckInDTO extends DTO{
     private String isPayment;
     private Byte[] image;
 
+
     public CheckInDTO() { };
 }
