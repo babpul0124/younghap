@@ -121,13 +121,13 @@ public class ClientThread extends Thread {
         // 로그인 성공 시 처리 로직
         send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.SUCCESS, 0, null); // 성공 응답
         dos.write(send_protocol.getBytes());
-        System.out.println("로그인 성공: " + userDTO.getLoginId());
+        System.out.println("로그인 성공: " + data.getLoginId());
     }
 
     private void user_login_refuse(UserDTO data) {
         // 로그인 실패 시 처리 로직
         send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.FAILURE, 0, null); // 실패 응답
         dos.write(send_protocol.getBytes());
-        System.out.println("로그인 실패: " + userDTO.getLoginId());
+        System.out.println("로그인 실패: " + data.getLoginId());
     }
 }
