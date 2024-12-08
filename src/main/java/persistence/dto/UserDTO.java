@@ -9,17 +9,17 @@ import lombok.Setter;
 public class UserDTO extends DTO{
     private int userId;
     private String name;
-    private String userRoll;
+    private String userRole;
     private String loginId;
     private String password;
 
     private double grade;
     private String address;
     private String gender;
-    private Boolean is_snoring;
+    private Boolean isSnoring;
     private String position;
 
-    private int office_tel;
+    private int officeTel;
 
     public UserDTO() { };
 }
