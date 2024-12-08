@@ -24,9 +24,9 @@ public class Main {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
 
-            String preQuery = "INSERT INTO domitory.distance (region_name, distance_score) VALUES (?, ?)";
+            String preQuery = "INSERT INTO domitory.user (region_name, distance_score) VALUES (?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(preQuery);
-            pstmt.setString(1, ("영국"));
+            pstmt.setString(1, ("응가의 나라"));
             pstmt.setInt(2, 101);
             pstmt.executeUpdate();
 

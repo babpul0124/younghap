@@ -1,8 +1,8 @@
 package network;
 
-import com.mysql.cj.protocol.Protocol;
 import service.*;
 import persistence.dto.*;
+import network.Protocol;
 
 import java.io.*;
 import java.net.Socket;

@@ -9,7 +9,7 @@ import lombok.Setter;
 public class UserDTO extends DTO{
     private int userId;
     private String name;
-    private String userRoll;
+    private String userRole;
     private String loginId;
     private String password;
 

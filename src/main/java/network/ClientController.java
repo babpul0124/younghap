@@ -38,7 +38,6 @@ public class ClientController {
             if(option == LOGIN) {
                 Protocol request_login = new Protocol(ProtocolType.REQUEST, ProtocolCode.CONNECT, 0, null);
                 dos.write(request_login.getBytes());
-
                 if (dis.read(readBuf) != -1) {
                     Protocol protocol = new Protocol(readBuf);
 
