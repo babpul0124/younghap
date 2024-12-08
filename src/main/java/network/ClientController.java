@@ -634,7 +634,7 @@ public class ClientController {
     public void viewCheck_out(UserDTO me) throws IOException {
         ArrayList<CheckOutDTO> DTOs = new ArrayList<>();
 
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.REFUND_QUERY, Integer.BYTES, me.getId());
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.REFUND_QUERY, Integer.BYTES, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
