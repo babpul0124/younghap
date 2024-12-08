@@ -123,17 +123,32 @@ public class ClientThread extends Thread {
         }
     }
 
-    private void user_login_accept(UserDTO data) {
+    private void user_login_accept(UserDTO data) throws IOException {
         // 로그인 성공 시 처리 로직
         send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.SUCCESS, 0, null); // 성공 응답
-        dos.write(send_protocol.getBytes());
-        System.out.println("로그인 성공: " + data.getLoginId());
+
+        // Protocol의 getBytes() 메서드가 정상적으로 byte[]를 반환하는지 확인
+        byte[] sendData = send_protocol.getBytes();
+        if (sendData != null) {
+            dos.write(sendData);  // byte[]로 반환된 데이터를 DataOutputStream을 통해 전송
+            System.out.println("로그인 성공: " + data.getLoginId());
+        } else {
+            System.out.println("Protocol에서 바이트 배열을 얻을 수 없습니다.");
+        }
     }
 
-    private void user_login_refuse(UserDTO data) {
+    private void user_login_refuse(UserDTO data) throws IOException {
         // 로그인 실패 시 처리 로직
         send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.FAILURE, 0, null); // 실패 응답
-        dos.write(send_protocol.getBytes());
-        System.out.println("로그인 실패: " + data.getLoginId());
+
+        // Protocol의 getBytes() 메서드가 정상적으로 byte[]를 반환하는지 확인
+        byte[] sendData = send_protocol.getBytes();
+        if (sendData != null) {
+            dos.write(sendData);  // byte[]로 반환된 데이터를 DataOutputStream을 통해 전송
+            System.out.println("로그인 실패: " + data.getLoginId());
+        } else {
+            System.out.println("Protocol에서 바이트 배열을 얻을 수 없습니다.");
+        }
     }
+
 }
