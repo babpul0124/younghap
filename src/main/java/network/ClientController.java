@@ -533,7 +533,7 @@ public class ClientController {
                     }
                 }
                 boolean ans = viewer.viewDormitoryFee(CheckInDTOs);
-                if(ans == true){
+                if(ans){
                     Protocol respond = new Protocol(
                             ProtocolType.RESPOND,
                             ProtocolCode.PAYMENT,
