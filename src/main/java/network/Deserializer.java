@@ -20,11 +20,13 @@ public class Deserializer {
     /* find class */
     String name;
     byte[] lengthByteArray = new byte[INT_LENGTH];
-    System.arraycopy(objInfo, idx, lengthByteArray, 0, INT_LENGTH); idx += INT_LENGTH;
+    System.arraycopy(objInfo, idx, lengthByteArray, 0, INT_LENGTH);
+    idx += INT_LENGTH;
     int length = byteArrayToInt(lengthByteArray);
 
     byte[] stringByteArray = new byte[length];
-    System.arraycopy(objInfo, idx, stringByteArray,  0, length); idx += length;
+    System.arraycopy(objInfo, idx, stringByteArray, 0, length);
+    idx += length;
     name = new String(stringByteArray);
 
     Class<?> c = Class.forName(name);
@@ -44,11 +46,12 @@ public class Deserializer {
       Field uidField = c.getDeclaredField(UID_FIELD_NAME);
       uidField.setAccessible(true);
       destUID = (long) uidField.get(c);
+    } catch (NoSuchFieldException e) {
     }
-    catch (NoSuchFieldException e) {  }
 
     byte[] longByteArray = new byte[LONG_LENGTH];
-    System.arraycopy(objInfo, idx, longByteArray, 0, LONG_LENGTH); idx += LONG_LENGTH;
+    System.arraycopy(objInfo, idx, longByteArray, 0, LONG_LENGTH);
+    idx += LONG_LENGTH;
     long srcUID = byteArrayToLong(longByteArray);
 
     if (destUID != srcUID) {
@@ -74,22 +77,19 @@ public class Deserializer {
 
         if (objInfo[idx++] == 0) {
           member[i].set(result, null);
-        }
-        else {
+        } else {
           typeStr = type.toString();
           if (typeStr.equals("int") || typeStr.contains("Integer")) {
             arr = new byte[INT_LENGTH];
             System.arraycopy(objInfo, idx, arr, 0, INT_LENGTH);
             idx += INT_LENGTH;
             member[i].set(result, byteArrayToInt(arr));
-          }
-          else if (typeStr.equals("long") || typeStr.contains("Long")) {
+          } else if (typeStr.equals("long") || typeStr.contains("Long")) {
             arr = new byte[LONG_LENGTH];
             System.arraycopy(objInfo, idx, arr, 0, LONG_LENGTH);
             idx += LONG_LENGTH;
             member[i].set(result, byteArrayToLong(arr));
-          }
-          else if (typeStr.contains("String")) {
+          } else if (typeStr.contains("String")) {
             arr = new byte[INT_LENGTH];
             System.arraycopy(objInfo, idx, arr, 0, INT_LENGTH);
             idx += INT_LENGTH;
@@ -99,9 +99,7 @@ public class Deserializer {
             System.arraycopy(objInfo, idx, arr, 0, length);
             idx += length;
             member[i].set(result, new String(arr));
-          }
-
-          else {
+          } else {
             for (Class<?> temp : type.getInterfaces()) {
               if (temp.getName().contains("Serializable")) {
                 arr = new byte[INT_LENGTH];
@@ -124,23 +122,24 @@ public class Deserializer {
   }
 
   public static int byteArrayToInt(byte[] arr) {
-    return (int)(
-        (0xff & arr[0]) << 8*3 |
-            (0xff & arr[1]) << 8*2 |
-            (0xff & arr[2]) << 8*1 |
-            (0xff & arr[3]) << 8*0
+    return (int) (
+        (0xff & arr[0]) << 8 * 3 |
+            (0xff & arr[1]) << 8 * 2 |
+            (0xff & arr[2]) << 8 * 1 |
+            (0xff & arr[3]) << 8 * 0
     );
   }
 
   public static long byteArrayToLong(byte[] arr) {
-    return (long)(
-        (0xff & arr[0]) << 8*7 |
-            (0xff & arr[1]) << 8*6 |
-            (0xff & arr[2]) << 8*5 |
-            (0xff & arr[3]) << 8*4 |
-            (0xff & arr[4]) << 8*3 |
-            (0xff & arr[5]) << 8*2 |
-            (0xff & arr[6]) << 8*1 |
-            (0xff & arr[7]) << 8*0
+    return (long) (
+        (0xff & arr[0]) << 8 * 7 |
+            (0xff & arr[1]) << 8 * 6 |
+            (0xff & arr[2]) << 8 * 5 |
+            (0xff & arr[3]) << 8 * 4 |
+            (0xff & arr[4]) << 8 * 3 |
+            (0xff & arr[5]) << 8 * 2 |
+            (0xff & arr[6]) << 8 * 1 |
+            (0xff & arr[7]) << 8 * 0
     );
   }
+}
