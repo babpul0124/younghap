@@ -9,9 +9,9 @@ public class Protocol {
   private byte type;
   private byte code;
   private int dataLength;
-  private Object data;
+  private DTO data;
 
-  public Protocol(byte t, byte c, int dL, Object d) {
+  public Protocol(byte t, byte c, int dL, DTO d) {
     type = t;
     code = c;
     dataLength = dL;
@@ -47,14 +47,18 @@ public class Protocol {
   }
 
   private DTO byteArrayToData(byte type, byte code, byte[] arr) throws Exception {
-    if (type == ProtocolType.RESPOND) {
+    if (type == ProtocolType.REQUEST) {
+      if(code == ProtocolCode.ID_PWD)
+        return (DTO) Deserializer.getObject(arr);
+    }
+
+    else if (type == ProtocolType.RESPOND) {
       return (DTO) Deserializer.getObject(arr);
     }
 
-    else if (type == ProtocolType.MODIFICATION || type == ProtocolType.SEARCH) {
-      if (code == ProtocolCode.MENU) {
-        return (DTO) Deserializer.getObject(arr);
-      }
+    else if(type == ProtocolType.RESULT){
+      return null;
+    }
 
     try {
       throw new Exception("타입과 코드가 맞지 않음");
