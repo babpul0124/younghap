@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CheckOutDTO {
+public class CheckOutDTO extends DTO {
     private int UserId;
     private String applicationStatus;
     private int dormitoryId;
