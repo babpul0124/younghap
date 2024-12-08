@@ -54,6 +54,7 @@ public class ClientThread extends Thread {
         if (type == ProtocolType.REQUEST) { //요청
             if (code == ProtocolCode.CONNECT) { //접속 요청
                 user_connect();
+                System.out.println("야~~~호!");
             }
         } else {
             System.out.println("알 수 없는 Protocol Type: " + type);

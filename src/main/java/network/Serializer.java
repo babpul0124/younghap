@@ -5,6 +5,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Serializer {
 
@@ -62,24 +64,45 @@ public class Serializer {
   }
 
   // 필드 직렬화
+  private static final Set<Object> serializedObjects = new HashSet<>();
+
   private static byte[] serializeField(Object fieldValue) throws Exception {
     if (fieldValue == null) {
       return new byte[]{0};  // null 처리
     }
 
+    // 이미 직렬화된 객체인지 확인
+    if (serializedObjects.contains(fieldValue)) {
+      throw new Exception("Circular reference detected for object: " + fieldValue);
+    }
+
+    serializedObjects.add(fieldValue); // 직렬화 중인 객체 추가
+
+    byte[] result;
     if (fieldValue instanceof Integer) {
-      return intToByteArray((Integer) fieldValue);  // 정수 타입
+      result = intToByteArray((Integer) fieldValue);  // 정수 타입
     } else if (fieldValue instanceof Long) {
-      return longToByteArray((Long) fieldValue);  // Long 타입
+      result = longToByteArray((Long) fieldValue);  // Long 타입
     } else if (fieldValue instanceof String) {
-      return stringToByteArray((String) fieldValue);  // String 타입
+      result = stringToByteArray((String) fieldValue);  // String 타입
     } else if (fieldValue instanceof LocalDateTime) {
-      return dateToByteArray((LocalDateTime) fieldValue);  // LocalDateTime 타입
+      result = dateToByteArray((LocalDateTime) fieldValue);  // LocalDateTime 타입
+    } else if (fieldValue instanceof Double) {
+      result = doubleToByteArray((Double) fieldValue);  // Double 타입 추가
     } else if (fieldValue instanceof Serializable) {
-      return getBytes(fieldValue);  // Serializable 객체는 재귀적으로 직렬화
+      result = getBytes(fieldValue);  // Serializable 객체는 재귀적으로 직렬화
     } else {
       throw new Exception("Cannot serialize field: " + fieldValue.getClass().getName());
     }
+
+    serializedObjects.remove(fieldValue); // 직렬화 완료 후 객체 제거
+    return result;
+  }
+
+  // Double을 바이트 배열로 변환
+  private static byte[] doubleToByteArray(Double val) {
+    long longBits = Double.doubleToLongBits(val);
+    return longToByteArray(longBits);
   }
 
   public static byte[] bitsToByteArray(byte val1, byte val2) {
