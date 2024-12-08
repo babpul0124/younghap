@@ -27,8 +27,7 @@ public class CheckInDTO extends DTO{
     private double grade;
     private int personalRoomId;
     private String isPayment;
-    private Byte[] image;
-
+    private byte[] image;
 
     public CheckInDTO() { };
 }
