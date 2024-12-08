@@ -1,4 +1,4 @@
-/*package persistence.dao;
+package persistence.dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.time.LocalDate;
@@ -50,7 +50,7 @@ public class CheckInDAO {
             System.out.println("error: " + e);
         }
     }
-    
+
     // 입사신청자 정보 목록 전송 함수
     public ArrayList<CheckInDTO> getApplicationList() {
 
@@ -362,4 +362,4 @@ public class CheckInDAO {
 
         return resultList;
     }
-}*/
+}
