@@ -2,7 +2,6 @@ package network;
 import java.io.*;
 import java.net.*;
 import persistence.dto.*;
-import persistence.enums.User_role;
 
 public class Client {
     private static final String IP = "127.0.0.1";

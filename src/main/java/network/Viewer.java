@@ -6,6 +6,8 @@ import persistence.dto.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class Viewer {
@@ -68,18 +70,23 @@ public class Viewer {
         System.out.print("입력 : ");
     }
 
-    public String[] getEvent_scheduleInfo() throws IOException {
-        String[] result = new String[3];
-
+    public EventDTO getEvent_scheduleInfo(BufferedReader keyInput) throws IOException {
+        EventDTO DTOs = new EventDTO();
         System.out.println("[선발 일정 등록]");
         System.out.print("일정 제목 : ");
-        result[0] = keyInput.readLine();
-        System.out.print("시작일 : ");
-        result[1] = keyInput.readLine();
-        System.out.print("종료일 : ");
-        result[2] = keyInput.readLine();
+        DTOs.setEventName(keyInput.readLine());
+        System.out.print("시작일(yyyy-mm-dd hh:mm:ss): ");
+        String startDate = keyInput.readLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(startDate, formatter);
+        DTOs.setStartDate(dateTime);
+        System.out.print("종료일(yyyy-mm-dd hh:mm:ss): ");
+        String endDate = keyInput.readLine();
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        dateTime = LocalDateTime.parse(endDate, formatter);
+        DTOs.setStartDate(dateTime);
 
-        return result;
+        return DTOs;
     }
 
     public void viewEvent_scheduleDTOs(ArrayList<EventDTO> DTOs) {

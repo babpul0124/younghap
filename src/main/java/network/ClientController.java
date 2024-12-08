@@ -97,6 +97,7 @@ public class ClientController {
 
     public void registEvent_schedule() throws IOException {
         ArrayList<EventDTO> DTOs = new ArrayList<>();
+        EventDTO DTO;
 
         Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SCHEDULE_REGISTER, 0, null);
         dos.write(registRequest.getBytes());
@@ -104,14 +105,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.RESPONSE_SCHEDULE_INFO) {
-                String[] event_scheduleInfo = viewer.getEvent_scheduleInfo();
+                DTO = viewer.getEvent_scheduleInfo(keyInput);
                 Protocol respond_event_scheduleInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_SCHEDULE_INFO,
-                        (byte) (event_scheduleInfo[0].getBytes().length +
-                                event_scheduleInfo[1].getBytes().length +
-                                event_scheduleInfo[2].getBytes().length),
-                        event_scheduleInfo
+                        (byte) DTO,
+                        DTO
                 );
                 dos.write(respond_event_scheduleInfo.getBytes());
 
