@@ -1,39 +1,30 @@
 package persistence.dao;
-
-import java.sql.Connection;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import persistence.dto.CheckOutDTO;
-import persistence.dto.DormitoryDTO;
-import persistence.dto.UserCheckOutResultDTO;
-import persistence.dto.UserDTO;
+
 
 public class CheckOutDAO {
 
     private final Connection connection;
     public CheckOutDAO(Connection connection) {this.connection = connection;}
 
-    UserDTO userDTO = new UserDTO();
-    DormitoryDTO dormitoryDTO = new DormitoryDTO();
-
     // 퇴실 신청 권한 확인 (1) 상태가 승인인 학생아이디 리스트 전송
-    public ArrayList<UserDTO> getApprovedStudentIds() {
+    public ArrayList<CheckOutDTO> getApprovedStudentIds() {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
-        ArrayList<UserDTO> approvedStudentIds = new ArrayList<>();
+        ArrayList<CheckOutDTO> approvedStudentIds = new ArrayList<>();
 
         String query = "SELECT student_id FROM application WHERE application_status = '승인'";
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
+        try (PreparedStatement statement = connection.prepareStatement(query); ResultSet rs = statement.executeQuery())
+        {
+            while (rs.next()) {
 
-            while (resultSet.next()) {
-                 int id = resultSet.getInt("student_id");
-                userDTO.setId(id);
-                approvedStudentIds.add(userDTO); // 승인된 student_id 추가
+                 checkOutDTO.setUserId(rs.getInt("student_id"));
+
+                 approvedStudentIds.add(checkOutDTO); // 승인된 student_id 추가
             }
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
@@ -41,19 +32,20 @@ public class CheckOutDAO {
     }
 
     //  퇴실 신청 권한 확인 (2) check_out 테이블에 있는 학생아이디 리스트 전송.
-    public ArrayList<UserDTO> getStudentIdsFromCheckOut() {
+    public ArrayList<CheckOutDTO> getStudentIdsFromCheckOut() {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
-        ArrayList<UserDTO> studentIds = new ArrayList<>();
+        ArrayList<CheckOutDTO> studentIds = new ArrayList<>();
 
         String query = "SELECT student_id FROM check_out";
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
+        try (PreparedStatement statement = connection.prepareStatement(query); ResultSet rs = statement.executeQuery()) {
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt("student_id");
-                userDTO.setId(id);
-                studentIds.add(userDTO); // student_id 추가
+            while (rs.next()) {
+
+                checkOutDTO.setUserId(rs.getInt("student_id"));
+
+                studentIds.add(checkOutDTO); // student_id 추가
             }
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
@@ -61,8 +53,13 @@ public class CheckOutDAO {
     }
 
     // 퇴사 신청 받아서 db에 저장.
-    public void processStudentCheckOut(int id, LocalDateTime checkOutDate, String bankName, String accountNum) {
-        String dormitoryId = null;
+    public void processStudentCheckOut(int userId, LocalDateTime checkOutDate, String bankName, String accountNum) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
+
+        checkOutDTO.setUserId(userId);
+        checkOutDTO.setCheckOutDate(checkOutDate);
+        checkOutDTO.setBankName(bankName);
+        checkOutDTO.setAccountNum(accountNum);
 
         // dormitory_id를 찾는 쿼리
         String findDormitoryIdQuery = "SELECT a.dormitory_id " +
@@ -71,29 +68,32 @@ public class CheckOutDAO {
                 "WHERE a.student_id = ? AND p.isPayment = '납부'";
 
         try (PreparedStatement statement = connection.prepareStatement(findDormitoryIdQuery)) {
-            statement.setInt(1, id); // student_id 설정
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    dormitoryId = resultSet.getString("dormitory_id"); // dormitory_id 추출
+            statement.setInt(1, checkOutDTO.getUserId()); // student_id 설정
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+
+                    checkOutDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 }
             }
         } catch (SQLException e) {
+
             System.out.println("Error while finding dormitory_id: " + e.getMessage());
             return; // dormitory_id를 찾지 못했으므로 함수 종료
         }
 
-        if (dormitoryId != null) {
             // check_out 테이블에 데이터 삽입
             String insertCheckOutQuery = "INSERT INTO check_out (dormitory_id, student_id, check_out_date, bank_name, account_num) " +
                     "VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(insertCheckOutQuery)) {
-                statement.setString(1, dormitoryId);  // dormitory_id 설정
-                statement.setInt(2, id);             // student_id 설정
-                statement.setTimestamp(3, Timestamp.valueOf(checkOutDate)); // check_out_date 설정
-                statement.setString(4, bankName);    // bank_name 설정
-                statement.setString(5, accountNum);  // account_num 설정
+
+                statement.setInt(1, checkOutDTO.getDormitoryId());  // dormitory_id 설정
+                statement.setInt(2, checkOutDTO.getUserId());             // student_id 설정
+                statement.setTimestamp(3, Timestamp.valueOf(checkOutDTO.getCheckOutDate())); // check_out_date 설정
+                statement.setString(4, checkOutDTO.getBankName());    // bank_name 설정
+                statement.setString(5, checkOutDTO.getAccountNum());  // account_num 설정
 
                 int rowsInserted = statement.executeUpdate();
                 if (rowsInserted > 0) {
@@ -101,17 +101,17 @@ public class CheckOutDAO {
                 }
             } catch (SQLException e) {
                 System.out.println("Error while inserting check-out data: " + e.getMessage());
-            }
-        } else {
-            System.out.println("해당 학생의 기숙사 정보를 찾을 수 없습니다.");
+
         }
     }
 
 
     // 학생 아이디로 dormitory_id를 찾는 메서드
-    private DormitoryDTO getDormitoryIdByStudentId(int id) {
+    private int getDormitoryIdByStudentId(int userId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
-        DormitoryDTO dormitory = null;
+        int findDormitoryId = 0;
+        checkOutDTO.setUserId(userId);
 
         String query = "SELECT a.dormitory_id " +
                 "FROM application a " +
@@ -119,23 +119,27 @@ public class CheckOutDAO {
                 "WHERE a.student_id = ? AND p.isPayment = '납부'";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, id); // student_id 설정
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    int dormitoryId = resultSet.getInt("dormitory_id"); // dormitory_id 추출
+            statement.setInt(1, checkOutDTO.getUserId()); // student_id 설정
 
-                    dormitory = new DormitoryDTO(); // DormitoryDTO 객체 생성
-                    dormitory.setDormitoryId(dormitoryId); // dormitoryId 설정
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+
+                    checkOutDTO.setDormitoryId(rs.getInt("dormitory_id"));
+
+                    findDormitoryId = checkOutDTO.getDormitoryId();
                 }
             } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
 
-        return dormitory; // dormitory_id 반환 (없으면 null)
+        return findDormitoryId; // dormitory_id 반환 (없으면 null)
     }
 
     // 퇴사 신청자 조회
-    public ArrayList<CheckOutDTO> getCheckOutListByDormitoryId(String dormitoryId) {
+    public ArrayList<CheckOutDTO> getCheckOutListByDormitoryId(int dormitoryId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
+
+        checkOutDTO.setDormitoryId(dormitoryId);
 
         ArrayList<CheckOutDTO> checkOutList = new ArrayList<>();
 
@@ -143,29 +147,16 @@ public class CheckOutDAO {
                 "FROM check_out WHERE dormitory_id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, dormitoryId);  // dormitory_id 설정
+            statement.setInt(1, checkOutDTO.getDormitoryId());  // dormitory_id 설정
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    String dormitoryIdResult = resultSet.getString("dormitory_id");
-                    int studentId = resultSet.getInt("student_id");
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
 
-                    // check_out_date를 Timestamp로 받아 LocalDateTime으로 변환
-                    Timestamp checkOutDateTimestamp = resultSet.getTimestamp("check_out_date");
-                    LocalDateTime checkOutDate = checkOutDateTimestamp.toLocalDateTime();
-
-                    String bankName = resultSet.getString("bank_name");
-                    String accountNum = resultSet.getString("account_num");
-                    String checkOutStatus = resultSet.getString("check_out_status");
-
-                    // DTO 객체 생성
-                    CheckOutDTO checkOutDTO = new CheckOutDTO();
-                    checkOutDTO.setDormitoryId(dormitoryIdResult);
-                    checkOutDTO.setStudentId(studentId);
-                    checkOutDTO.setCheckOutDate(checkOutDate);  // checkOutDate는 null이 아니어야 함
-                    checkOutDTO.setBankName(bankName);
-                    checkOutDTO.setAccountNum(accountNum);
-                    checkOutDTO.setCheckOutStatus(checkOutStatus);
+                    checkOutDTO.setUserId(rs.getInt("student_id"));
+                    checkOutDTO.setCheckOutDate(rs.getTimestamp("check_out_date").toLocalDateTime());
+                    checkOutDTO.setBankName(rs.getString("bank_name"));
+                    checkOutDTO.setAccountNum(rs.getString("account_num"));
+                    checkOutDTO.setCheckOutStatus(rs.getString("check_out_status"));
 
                     // 리스트에 추가
                     checkOutList.add(checkOutDTO);
@@ -177,45 +168,55 @@ public class CheckOutDAO {
     }
 
     // 환불 상태 바꾸는 함수
-    public void updateCheckOutStatus(int studentId, String checkOutStatus) {
+    public void updateCheckOutStatus(int userId, String checkOutStatus) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
+
+
+        checkOutDTO.setUserId(userId);
+        checkOutDTO.setCheckOutStatus(checkOutStatus);
 
         String query = "UPDATE check_out SET check_out_status = ? WHERE student_id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, checkOutStatus);  // 새로운 상태 설정
-            statement.setInt(2, studentId);     // 학생 아이디 설정
+
+            statement.setString(1, checkOutDTO.getCheckOutStatus());  // 새로운 상태 설정
+            statement.setInt(2, checkOutDTO.getUserId());     // 학생 아이디 설정
+
             statement.executeUpdate(); // 쿼리 실행
 
         } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
     }
 
     // 사용자의 환불 확인
-    public ArrayList<UserCheckOutResultDTO> getCheckOutInfoByStudentId(int studentId) {
+    public ArrayList<CheckOutDTO> getCheckOutInfoByStudentId(int userId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
+
+        checkOutDTO.setUserId(userId);
+
         String query = "SELECT co.check_out_date, co.bank_name, co.account_num, co.check_out_status, d.dormitory_name " +
                 "FROM check_out co " +
                 "JOIN dormitory d ON co.dormitory_id = d.dormitory_id " +
                 "WHERE co.student_id = ?";
 
-        ArrayList<UserCheckOutResultDTO> checkOutInfoList = new ArrayList<>();
+        ArrayList<CheckOutDTO> checkOutInfoList = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(query) ) {
 
-            statement.setInt(1, studentId); // student_id 설정
+            statement.setInt(1, checkOutDTO.getUserId()); // student_id 설정
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
                     // DTO 객체 생성
-                    UserCheckOutResultDTO dto = new UserCheckOutResultDTO();
 
-                    dto.setStudentId(studentId); // studentId를 DTO에 설정
-                    dto.setCheckOutDate(resultSet.getString("check_out_date"));
-                    dto.setBankName(resultSet.getString("bank_name"));
-                    dto.setAccountNum(resultSet.getString("account_num"));
-                    dto.setCheckOutStatus(resultSet.getString("check_out_status"));
-                    dto.setDormitoryName(resultSet.getString("dormitory_name"));
+                    checkOutDTO.setUserId(checkOutDTO.getUserId()); // studentId를 DTO에 설정
+                    checkOutDTO.setCheckOutDate(rs.getTimestamp("check_out_date").toLocalDateTime());
+                    checkOutDTO.setBankName(rs.getString("bank_name"));
+                    checkOutDTO.setAccountNum(rs.getString("account_num"));
+                    checkOutDTO.setCheckOutStatus(rs.getString("check_out_status"));
+                    checkOutDTO.setDormitoryName(rs.getString("dormitory_name"));
 
                     // 리스트에 DTO 추가
-                    checkOutInfoList.add(dto);
+                    checkOutInfoList.add(checkOutDTO);
                 }
             }
         } catch (SQLException e) {

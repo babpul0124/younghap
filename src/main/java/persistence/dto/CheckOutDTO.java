@@ -7,11 +7,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CheckOutDTO {
-    private String dormitoryId;
-    private int studentId;
+public class CheckOutDTO extends DTO {
+    private int UserId;
+    private String applicationStatus;
+    private int dormitoryId;
+    private String dormitoryName;
+    private int applicationId;
+    private String isPayment;
     private LocalDateTime checkOutDate;
     private String bankName;
     private String accountNum;
     private String checkOutStatus;
+
+    public CheckOutDTO() {};
 }

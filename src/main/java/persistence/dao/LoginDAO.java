@@ -8,10 +8,9 @@ public class LoginDAO {
     private final Connection connection;
     public LoginDAO(Connection connection) { this.connection = connection;}
 
-    LoginDTO loginDTO = new LoginDTO();
-
     //아이디 패스워드 목록 전송 함수
     public ArrayList<LoginDTO> getIdPwList() {
+        LoginDTO loginDTO = new LoginDTO();
 
         ArrayList<LoginDTO> userIdPws = new ArrayList<>();
 
@@ -33,6 +32,7 @@ public class LoginDAO {
     }
 
     public void saveIdPw(String loginId, String password) {
+        LoginDTO loginDTO = new LoginDTO();
         String query = "INSERT INTO user (login_id, password) VALUES (?, ?)";
 
         loginDTO.setLoginId(loginId);
