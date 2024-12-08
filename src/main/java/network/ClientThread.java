@@ -23,8 +23,11 @@ public class ClientThread extends Thread {
     private CheckOutDAO checkOutDAO;
     private DormitoryDAO dormitoryDAO;
 
+    private final UserService userService;
+
     ClientThread(Socket socket, LoginDAO loginDAO, CheckInDAO checkInDAO, CheckOutDAO checkOutDAO, DormitoryDAO dormitoryDAO) {
         this.socket = socket;
+        this.userService = new UserService(loginDAO);
     }
 
     @Override
