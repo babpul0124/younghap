@@ -164,9 +164,11 @@ public class Viewer {
         System.out.println();
     }
 
-    public int getStudent_id() throws IOException {
+    public UserDTO getStudent_id() throws IOException {
         System.out.println("환불할 거주자의 학번 입력: ");
-        return Integer.parseInt(keyInput.readLine());
+        UserDTO dto = new UserDTO();
+        dto.setUserId(Integer.parseInt(keyInput.readLine()));
+        return dto;
     }
 
     public int getSelectScheduleOrCost() throws IOException {
@@ -183,8 +185,8 @@ public class Viewer {
         System.out.println();
     }
 
-    public String[] applicationInfo(UserDTO me) throws IOException {
-        String[] result = new String[5];
+    public DormitoryDTO applicationInfo(UserDTO me) throws IOException {
+        DormitoryDTO dto;
 
         result[0] = me + ""; //학번
         System.out.println("[입사 신청 정보 입력]");

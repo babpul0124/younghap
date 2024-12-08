@@ -281,7 +281,7 @@ public class ClientController {
                                 send_ack();
                             }
                         }
-                        viewer.viewPaymentListDTOs(ApplicationListDTOs);
+                        viewer.viewPaymentListDTOs(CheckInDTOs);
                     }
                 }
             }
@@ -290,7 +290,7 @@ public class ClientController {
 
     public void viewUnpayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -298,12 +298,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.UNPAID_APPLICANT_QUERY,
-                        Integer.BYTES,
-                        Dormitory_id
+                        0,
+                        dormitoryDTO
                 );
                 dos.write(respondDormitory_id.getBytes());
 
@@ -313,11 +313,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewUnpaymentListDTOs(ApplicationListDTOs);
+                        viewer.viewUnpaymentListDTOs(CheckInDTOs);
                     }
                 }
             }
@@ -326,7 +326,7 @@ public class ClientController {
 
     public void viewTuberculosisCertificater() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -349,11 +349,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                                CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewTuberculosisCertificaterList(ApplicationListDTOs);
+                        viewer.viewTuberculosisCertificaterList(CheckInDTOs);
                     }
                 }
             }
@@ -369,24 +369,24 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dormitoryDTO = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.WITHDRAWAL_APPLICANT_QUERY,
-                        Integer.BYTES,
-                        Dormitory_id
+                        0,
+                        dormitoryDTO
                 );
                 dos.write(respondDormitory_id.getBytes());
 
                 if (dis.read(readBuf) != -1) {
                     Protocol response = new Protocol(readBuf);
                     if (response.getCode() == ProtocolCode.WITHDRAWAL_APPLICANT_QUERY) {
-                        int Student_id = viewer.getStudent_id();
+                        UserDTO userDto = viewer.getStudent_id();
                         Protocol respondStudent_id = new Protocol(
                                 ProtocolType.RESPOND,
                                 ProtocolCode.WITHDRAWAL_APPLICANT_QUERY,
-                                Integer.BYTES,
-                                Student_id
+                                0,
+                                userDto
                         );
                         dos.write(respondStudent_id.getBytes());
                         if (dis.read(readBuf) != -1) {
@@ -403,7 +403,6 @@ public class ClientController {
     }
 
     public void viewEvent_schedule() throws IOException {
-        ArrayList<EventDTO> EventDTOs = new ArrayList<>();
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SCHEDULE_COST_QUERY, 0, null);
@@ -417,8 +416,8 @@ public class ClientController {
                     Protocol respondMenu = new Protocol(
                             ProtocolType.RESPOND,
                             ProtocolCode.SCHEDULE_QUERY,
-                            Integer.BYTES,
-                            selectScheduleOrCost
+                            0,
+                            null
                     );
                     dos.write(respondMenu.getBytes());
 
@@ -428,19 +427,18 @@ public class ClientController {
                             int dataCount = Deserializer.byteArrayToInt(readBuf);
                             for (int i = 0; i < dataCount; i++) {
                                 if (dis.read(readBuf) != -1) {
-                                    EventDTOs.add((EventDTO) new Protocol(readBuf).getData());
-                                    send_ack();
+                                    DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
                                 }
                             }
-                            viewer.viewEventDTO(EventDTOs);
+                            viewer.viewEventDTO(DormitoryDTOs);
                         }
                     }
                 }else if(selectScheduleOrCost == 2){
                     Protocol respondMenu = new Protocol(
                             ProtocolType.RESPOND,
                             ProtocolCode.COST_QUERY,
-                            Integer.BYTES,
-                            selectScheduleOrCost
+                            0,
+                            null
                     );
                     dos.write(respondMenu.getBytes());
 
@@ -451,7 +449,6 @@ public class ClientController {
                             for (int i = 0; i < dataCount; i++) {
                                 if (dis.read(readBuf) != -1) {
                                     DormitoryDTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
-                                    send_ack();
                                 }
                             }
                             viewer.viewDormitoryDTOs(DormitoryDTOs);
@@ -481,7 +478,7 @@ public class ClientController {
                     }
                 }
                 viewer.viewDormitoryDTOs(DormitoryDTOs);
-                String[] applicationInfo = viewer.applicationInfo(me);
+                DormitoryDTO dormitoryDTO = viewer.applicationInfo(me);
                 Protocol respondApplicationInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_APPLICATION_INFO,
