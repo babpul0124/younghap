@@ -79,6 +79,10 @@ public class Serializer {
     }
   }
 
+  public static byte[] bitsToByteArray(byte val1, byte val2) {
+    return new byte[] { val1, val2 };
+  }
+
   public static byte[] intToByteArray(int val) {
     return new byte[]{
         (byte) ((val >> 8 * 3) & 0xff),
