@@ -5,111 +5,148 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Serializer {
+  final static String UID_FIELD_NAME = "serialVersionUID";
+  final static long DEFAULT_UID = 0l;
 
-  // 객체를 바이트 배열로 직렬화하는 메소드
-  public static byte[] getBytes(Object obj) throws Exception {
+
+  public static byte[] getBytes(Serializable obj) throws Exception {
+    Class<?> c = obj.getClass();
     ArrayList<Byte> result = new ArrayList<>();
-    byte[] head = makeHeader(obj);  // 헤더 생성
-    byte[] body = makeBody(obj);    // 바디 생성
-
-    addArrList(result, intToByteArray(head.length + body.length)); // 길이 추가
-    addArrList(result, head);    // 헤더 추가
-    addArrList(result, body);    // 바디 추가
-
-    return byteListToArray(result);  // 최종 바이트 배열 반환
-  }
-
-  // 헤더 생성 (serialVersionUID 포함)
-  public static byte[] makeHeader(Object obj) throws Exception {
-    ArrayList<Byte> result = new ArrayList<>();
-    long uid = 0L;  // 기본 serialVersionUID 값
-
-    try {
-      Field uidField = obj.getClass().getDeclaredField("serialVersionUID");
-      uidField.setAccessible(true);
-      uid = (long) uidField.get(obj);  // serialVersionUID 가져오기
-    } catch (NoSuchFieldException e) {
-      // serialVersionUID가 없으면 기본 값 사용
+    byte[] head = makeHeader(obj);
+    byte[] body;
+    if (c.isEnum()) {
+      body = stringToByteArray(((Enum) obj).name());
+    }
+    else {
+      body = makeBody(obj);
     }
 
-    addArrList(result, longToByteArray(uid));  // UID를 바이트 배열로 변환하여 추가
+    addArrList(result, intToByteArray(head.length + body.length));
+    addArrList(result, head);
+    addArrList(result, body);
     return byteListToArray(result);
   }
 
-  // 객체의 필드를 직렬화하여 바디 생성
-  public static byte[] makeBody(Object obj) throws Exception {
-    Field[] fields = obj.getClass().getDeclaredFields();  // 모든 필드 가져오기
+  public static byte[] makeHeader(Serializable obj) throws Exception {
+    Class<?> c = obj.getClass();
+
+    String cName = c.getName();
+    long uid = DEFAULT_UID;
+
+    Field[] member = c.getDeclaredFields();
     ArrayList<Byte> result = new ArrayList<>();
 
-    for (Field field : fields) {
-      if (!Modifier.isStatic(field.getModifiers())) {  // static 필드는 제외
-        field.setAccessible(true);
-        Object value = field.get(obj);
+    try {
+      Field uidField = c.getDeclaredField(UID_FIELD_NAME);
+      uidField.setAccessible(true);
+      uid = (long) uidField.get(result);
+    }
+    catch (NoSuchFieldException e) {  }
 
-        if (value == null) {
-          addArrList(result, new byte[]{0});  // null인 경우
-        } else {
-          byte[] fieldBytes = serializeField(value);  // 필드 직렬화
-          addArrList(result, new byte[]{1});  // 값이 존재하는 경우
-          addArrList(result, fieldBytes);    // 직렬화된 필드값 추가
+    addArrList(result, stringToByteArray(cName));
+    addArrList(result, longToByteArray(uid));
+    return byteListToArray(result);
+  }
+
+  public static byte[] makeBody(Serializable obj) throws Exception {
+    Class<?> c = obj.getClass();
+
+    Field[] member = c.getDeclaredFields();
+    ArrayList<Byte> result = new ArrayList<>();
+
+    byte[] arr = new byte[0];
+    Class<?> type;
+    Object memberVal;
+    String typeStr;
+
+    for (int i = 0; i < member.length; i++) {
+      if (!Modifier.isStatic(member[i].getModifiers())) {
+        member[i].setAccessible(true);
+        type = member[i].getType();
+        memberVal = member[i].get(obj);
+
+        if (memberVal == null) {    // 직렬화 첫 비트는 null 확인용 비트
+          addArrList(result, new byte[]{0});
+        }
+        else {
+          typeStr = type.toString();
+          if (typeStr.equals("int")) {
+            arr = intToByteArray((int) memberVal);
+          }
+          else if (typeStr.equals("long")) {
+            arr = longToByteArray((long) memberVal);
+          }
+          else if (typeStr.contains("Integer")) {
+            arr = intToByteArray((Integer) memberVal);
+          }
+          else if (typeStr.contains("Long")) {
+            arr = longToByteArray((Long) memberVal);
+          }
+          else if (typeStr.contains("String")) {
+            arr = stringToByteArray((String) memberVal);
+          }
+          else if (typeStr.contains("LocalDateTime")) {
+            arr = dateToByteArray((LocalDateTime)memberVal);
+          }
+          else {
+            for (Class<?> temp : type.getInterfaces()) {
+              if (temp.getName().contains("Serializable")) {
+                arr = getBytes((Serializable) memberVal);
+              }
+            }
+          }
+          addArrList(result, new byte[]{1});
+          addArrList(result, arr);
         }
       }
     }
 
-    return byteListToArray(result);  // 최종 바디 반환
+    return byteListToArray(result);
   }
 
-  // 필드 직렬화
-  private static final Set<Object> serializedObjects = new HashSet<>();
 
-  private static byte[] serializeField(Object fieldValue) throws Exception {
-    if (fieldValue == null) {
-      return new byte[]{0};  // null 처리
-    }
 
-    // 이미 직렬화된 객체인지 확인
-    if (serializedObjects.contains(fieldValue)) {
-      throw new Exception("Circular reference detected for object: " + fieldValue);
-    }
-
-    serializedObjects.add(fieldValue); // 직렬화 중인 객체 추가
-
-    byte[] result;
-    if (fieldValue instanceof Integer) {
-      result = intToByteArray((Integer) fieldValue);  // 정수 타입
-    } else if (fieldValue instanceof Long) {
-      result = longToByteArray((Long) fieldValue);  // Long 타입
-    } else if (fieldValue instanceof String) {
-      result = stringToByteArray((String) fieldValue);  // String 타입
-    } else if (fieldValue instanceof LocalDateTime) {
-      result = dateToByteArray((LocalDateTime) fieldValue);  // LocalDateTime 타입
-    } else if (fieldValue instanceof Double) {
-      result = doubleToByteArray((Double) fieldValue);  // Double 타입 추가
-    } else if (fieldValue instanceof Serializable) {
-      result = getBytes(fieldValue);  // Serializable 객체는 재귀적으로 직렬화
-    } else {
-      throw new Exception("Cannot serialize field: " + fieldValue.getClass().getName());
-    }
-
-    serializedObjects.remove(fieldValue); // 직렬화 완료 후 객체 제거
-    return result;
-  }
-
-  // Double을 바이트 배열로 변환
-  private static byte[] doubleToByteArray(Double val) {
-    long longBits = Double.doubleToLongBits(val);
-    return longToByteArray(longBits);
-  }
 
   public static byte[] bitsToByteArray(byte val1, byte val2) {
     return new byte[] { val1, val2 };
   }
 
-  // LocalDateTime을 바이트 배열로 직렬화
+  public static byte[] intToByteArray(int val) {
+    return new byte[] {
+        (byte)((val >> 8*3) & 0xff),
+        (byte)((val >> 8*2) & 0xff),
+        (byte)((val >> 8*1) & 0xff),
+        (byte)((val >> 8*0) & 0xff)
+    };
+  }
+
+  public static byte[] longToByteArray(long val) {
+    return new byte[] {
+        (byte)((val >> 8*7) & 0xff),
+        (byte)((val >> 8*6) & 0xff),
+        (byte)((val >> 8*5) & 0xff),
+        (byte)((val >> 8*4) & 0xff),
+        (byte)((val >> 8*3) & 0xff),
+        (byte)((val >> 8*2) & 0xff),
+        (byte)((val >> 8*1) & 0xff),
+        (byte)((val >> 8*0) & 0xff)
+    };
+  }
+
+  public static byte[] stringToByteArray(String str) {
+    ArrayList<Byte> result = new ArrayList<>();
+    byte[] arr = str.getBytes();
+
+    int length = arr.length;
+    byte[] lengthByteArray = Serializer.intToByteArray(length);
+
+    addArrList(result, lengthByteArray);
+    addArrList(result, arr);
+    return byteListToArray(result);
+  }
+
   public static byte[] dateToByteArray(LocalDateTime val) {
     byte[] yearByteArray = intToByteArray(val.getYear());
     byte[] monthByteArray = intToByteArray(val.getMonth().getValue());
@@ -117,74 +154,34 @@ public class Serializer {
     byte[] hourByteArray = intToByteArray(val.getHour());
     byte[] minuteByteArray = intToByteArray(val.getMinute());
 
-    int resultArrayLength = yearByteArray.length + monthByteArray.length + dayByteArray.length
-        + hourByteArray.length + minuteByteArray.length;
+    int resultArrayLength = yearByteArray.length + monthByteArray.length + dayByteArray.length + hourByteArray.length + minuteByteArray.length;
     byte[] resultArray = new byte[resultArrayLength];
 
     int pos = 0;
-    System.arraycopy(yearByteArray, 0, resultArray, pos, yearByteArray.length);
-    pos += yearByteArray.length;
-    System.arraycopy(monthByteArray, 0, resultArray, pos, monthByteArray.length);
-    pos += monthByteArray.length;
-    System.arraycopy(dayByteArray, 0, resultArray, pos, dayByteArray.length);
-    pos += dayByteArray.length;
-    System.arraycopy(hourByteArray, 0, resultArray, pos, hourByteArray.length);
-    pos += hourByteArray.length;
-    System.arraycopy(minuteByteArray, 0, resultArray, pos, minuteByteArray.length);
+    System.arraycopy(yearByteArray, 0, resultArray, pos, yearByteArray.length); pos += yearByteArray.length;
+    System.arraycopy(monthByteArray, 0, resultArray, pos, monthByteArray.length); pos += monthByteArray.length;
+    System.arraycopy(dayByteArray, 0, resultArray, pos, dayByteArray.length); pos += dayByteArray.length;
+    System.arraycopy(hourByteArray, 0, resultArray, pos, hourByteArray.length); pos += hourByteArray.length;
+    System.arraycopy(minuteByteArray, 0, resultArray, pos, minuteByteArray.length); pos += minuteByteArray.length;
 
     return resultArray;
   }
 
-  // int를 바이트 배열로 변환
-  public static byte[] intToByteArray(int val) {
-    return new byte[]{
-        (byte) ((val >> 24) & 0xff),
-        (byte) ((val >> 16) & 0xff),
-        (byte) ((val >> 8) & 0xff),
-        (byte) (val & 0xff)
-    };
-  }
 
-  // long을 바이트 배열로 변환
-  public static byte[] longToByteArray(long val) {
-    return new byte[]{
-        (byte) ((val >> 56) & 0xff),
-        (byte) ((val >> 48) & 0xff),
-        (byte) ((val >> 40) & 0xff),
-        (byte) ((val >> 32) & 0xff),
-        (byte) ((val >> 24) & 0xff),
-        (byte) ((val >> 16) & 0xff),
-        (byte) ((val >> 8) & 0xff),
-        (byte) (val & 0xff)
-    };
-  }
 
-  // String을 바이트 배열로 변환
-  public static byte[] stringToByteArray(String str) {
-    ArrayList<Byte> result = new ArrayList<>();
-    byte[] arr = str.getBytes();
-
-    int length = arr.length;
-    byte[] lengthByteArray = intToByteArray(length);
-
-    addArrList(result, lengthByteArray);  // 문자열 길이 추가
-    addArrList(result, arr);  // 문자열 바이트 배열 추가
-    return byteListToArray(result);
-  }
-
-  // ArrayList에 바이트 배열을 추가하는 메소드
+  /* util */
   public static void addArrList(ArrayList<Byte> result, byte[] arr) {
-    for (byte b : arr) {
-      result.add(b);
+    for(int j = 0; j < arr.length; j++) {
+      result.add(arr[j]);
     }
   }
 
-  // ArrayList를 바이트 배열로 변환
   public static byte[] byteListToArray(ArrayList<Byte> byteList) {
     byte[] returnArray = new byte[byteList.size()];
-    for (int i = 0; i < byteList.size(); i++) {
+    for(int i = 0; i < byteList.size(); i++) {
       returnArray[i] = byteList.get(i);
     }
+
     return returnArray;
   }
 }

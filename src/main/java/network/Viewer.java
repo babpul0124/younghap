@@ -26,8 +26,8 @@ public class Viewer {
         return Integer.parseInt(keyInput.readLine());
     }
 
-    public UserDTO loginScreen(BufferedReader keyInput) throws IOException {
-        UserDTO userInfo = new UserDTO();
+    public LoginDTO loginScreen(BufferedReader keyInput) throws IOException {
+        LoginDTO userInfo = new LoginDTO();
 
         System.out.print("ID : ");
         userInfo.setLoginId(keyInput.readLine());

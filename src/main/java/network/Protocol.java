@@ -48,27 +48,22 @@ public class Protocol {
 
   private DTO byteArrayToData(byte type, byte code, byte[] arr) throws Exception {
     if (type == ProtocolType.REQUEST) {
-      if(code == ProtocolCode.ID_PWD)
-        return (DTO) Deserializer.getObject(arr);
+      return (DTO) Deserializer.getObject(arr);
     }
-
-    else if (type == ProtocolType.RESPOND) {
+    else if (type ==ProtocolType.RESPOND) {
       return (DTO) Deserializer.getObject(arr);
     }
 
-    else if(type == ProtocolType.RESULT){
+      try {
+        throw new Exception("타입과 코드가 맞지 않음");
+      } catch (Exception e) {
+        System.out.println(type + " " + code);
+        e.printStackTrace();
+      }
+
       return null;
     }
 
-    try {
-      throw new Exception("타입과 코드가 맞지 않음");
-    } catch (Exception e) {
-      System.out.println(type + " " + code);
-      e.printStackTrace();
-    }
-
-    return null;
-  }
 
   public void byteArrayToProtocol(byte[] arr) {
     final int INT_LENGTH = 4;
@@ -84,7 +79,7 @@ public class Protocol {
     byte[] dataArray = new byte[dataLength];
     System.arraycopy(arr, 2 + INT_LENGTH, dataArray, 0, dataLength); pos += dataLength;
     try {
-      data = byteArrayToData(type, code, dataArray);
+      data = byteArrayToData(type, code,  dataArray);
     }
     catch (Exception e) {
       e.printStackTrace();

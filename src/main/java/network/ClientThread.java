@@ -47,7 +47,6 @@ public class ClientThread extends Thread {
 
       while (is.read(readBuf) != -1) {
         Protocol protocol = new Protocol(readBuf);
-
         selectFunction(protocol);
       }
 
@@ -59,17 +58,16 @@ public class ClientThread extends Thread {
   private void selectFunction(Protocol protocol) throws IOException {
     byte type = protocol.getType();
     byte code = protocol.getCode();
-    DTO data = protocol.getData();
+    Object data = protocol.getData();
 
-    if (type == ProtocolType.REQUEST) { //요청
-      if (code == ProtocolCode.CONNECT) { //접속 요청
+    if (type == ProtocolType.REQUEST) {
+      if (code == ProtocolCode.CONNECT) {
         user_connect();
 
       }
     } else if (type == ProtocolType.RESPOND) {
-      if (code == ProtocolCode.ID_PWD) { //접속 요청
+      if (code == ProtocolCode.ID_PWD) {
         user_logIn((LoginDTO) data);
-        System.out.println("hellp");
       }
 
     } else {
