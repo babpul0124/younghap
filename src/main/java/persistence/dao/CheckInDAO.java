@@ -53,19 +53,18 @@ public class CheckInDAO {
     
     // 입사신청자 정보 목록 전송 함수
     public ArrayList<CheckInDTO> getApplicationList() {
-        CheckInDTO checkInDTO = new CheckInDTO();
-
 
         ArrayList<CheckInDTO> applicationList = new ArrayList<>();
 
         String query = "SELECT a.dormitory_id, a.student_id, a.preference, a.application_status, " +
-                "a.meal_frequency, a.application_date, a.image_path, u.is_snoring, u.name " +
+                "a.meal_frequency, a.application_date, a.image, u.is_snoring, u.name " +
                 "FROM application a " +
                 "JOIN user u ON a.student_id = u.id";
 
         try (PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
+                CheckInDTO checkInDTO = new CheckInDTO();
 
                 checkInDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 checkInDTO.setUserId(rs.getInt("student_id"));
@@ -74,7 +73,12 @@ public class CheckInDAO {
                 checkInDTO.setMealFrequency(rs.getInt("meal_frequency"));
                 checkInDTO.setApplicationDate(rs.getDate("application_date").toLocalDate());
 
-                checkInDTO.setMealFrequency(rs.getByte[](""));
+                // BLOB 데이터를 byte[]로 변환
+                Blob imageBlob = rs.getBlob("image");
+                if (imageBlob != null) {
+                    int length = (int) imageBlob.length();
+                    checkInDTO.setImage(imageBlob.getBytes(1, length));  // BLOB -> byte[] 변환
+                }
 
                 checkInDTO.setIsSnoring(rs.getInt("is_snoring"));
                 checkInDTO.setUserName(rs.getString("name"));
@@ -87,7 +91,6 @@ public class CheckInDAO {
         }
 
         return applicationList;
-
     }
 
     // 입사자 선발에 필요한 데이터 전송
@@ -276,13 +279,14 @@ public class CheckInDAO {
         CheckInDTO checkInDTO = new CheckInDTO();
 
         checkInDTO.setUserId(userId);
+        checkInDTO.setImage(image);
 
         String query = "UPDATE application SET image = ? WHERE student_id = ?"; // students 테이블의 image 필드에 저장
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             byte[] imageBytes = checkInDTO.getImage();
             if (imageBytes != null) {
-                statement.setBytes(1, imageBytes); // BLOB 필드에 이미지 저장
+                statement.setBytes(1, checkInDTO.getImage()); // BLOB 필드에 이미지 저장. 자동으로 됨.
             }
             statement.setInt(2, checkInDTO.getUserId()); // 학생 ID 설정
 
@@ -293,34 +297,32 @@ public class CheckInDAO {
 
     //결핵 진단서 제출 확인
     public String checkStudentImageSubmitted(int userId) {
-        CheckInDTO checkInDTO = new CheckInDTO();
-
-        checkInDTO.setUserId(userId);
+        String result = "No";  // 기본값을 "No"로 설정
 
         String query = "SELECT image FROM application WHERE student_id = ?"; // application 테이블에서 image 조회
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setInt(1, checkInDTO.getUserId());
+            statement.setInt(1, userId);  // userId를 쿼리에 세팅
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     Blob imageBlob = resultSet.getBlob("image"); // image 컬럼 조회
 
                     if (imageBlob != null && imageBlob.length() > 0) {
-
                         System.out.println("결핵진단서 제출됨.");
-                        checkInDTO.setResult("Yes");
+                        result = "Yes";
                     } else {
-
                         System.out.println("결핵진단서 미제출.");
-                        checkInDTO.setResult("No");
                     }
                 }
             }
-        } catch (SQLException e) {System.out.println("Error: " + e.getMessage());}
-        return checkInDTO.getResult();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        return result;
     }
+
 
 
     // 생활관 비용 납부자&미납부자 생활관 별로 조회
@@ -351,7 +353,7 @@ public class CheckInDAO {
                     checkInDTO.setUserId(resultSet.getInt("id"));
                     checkInDTO.setUserName(resultSet.getString("name"));
                     checkInDTO.setDormitoryFee(resultSet.getInt("dormitory_fee"));
-                    checkInDTO.setIsPayment(resultSet.getString("isPayment")); //
+                    checkInDTO.setIsPayment(resultSet.getString("isPayment"));
 
                     resultList.add(checkInDTO);
                 }
