@@ -62,10 +62,10 @@ public class ClientThread extends Thread {
         }
         else if (type == ProtocolType.RESULT) { //결과
             if(code == (ProtocolCode.ID_PWD | ProtocolCode.SUCCESS)){ //아이디, 비번 결과
-                user_login_accept();
+                user_login_accept((UserDTO)data);
             }
             else if(code == (ProtocolCode.ID_PWD | ProtocolCode.FAILURE)){ //아이디, 비번 결과
-                user_login_refuse();
+                user_login_refuse((UserDTO)data);
             }
         } else {
             System.out.println("알 수 없는 Protocol Type: " + type);
@@ -116,7 +116,7 @@ public class ClientThread extends Thread {
             user_login_refuse(userDTO);
         }
     }
-    
+
     private void user_login_accept(UserDTO userDTO) throws IOException {
         // 로그인 성공 시 처리 로직
         send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.SUCCESS, 0, null); // 성공 응답
