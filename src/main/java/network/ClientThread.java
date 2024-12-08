@@ -54,9 +54,6 @@ public class ClientThread extends Thread {
             else if (code == ProtocolCode.ID_PWD) { //아이디, 비번 요청
                 user_login((UserDTO) data);
             }
-            else {
-                System.out.println("알 수 없는 REQUEST 코드: " + code);
-            }
         }
         else if (type == ProtocolType.RESPOND) { //응답
             if (code == ProtocolCode.ID_PWD) { //아이디, 비번 응답.
@@ -119,12 +116,18 @@ public class ClientThread extends Thread {
             user_login_refuse(userDTO);
         }
     }
-
+    
     private void user_login_accept(UserDTO userDTO) throws IOException {
         // 로그인 성공 시 처리 로직
+        send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.SUCCESS, 0, null); // 성공 응답
+        dos.write(send_protocol.getBytes());
+        System.out.println("로그인 성공: " + userDTO.getLoginId());
     }
 
     private void user_login_refuse(UserDTO userDTO) throws IOException {
         // 로그인 실패 시 처리 로직
+        send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.FAILURE, 0, null); // 실패 응답
+        dos.write(send_protocol.getBytes());
+        System.out.println("로그인 실패: " + userDTO.getLoginId());
     }
 }
