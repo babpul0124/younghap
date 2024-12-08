@@ -9,10 +9,10 @@ public class CheckInDAO {
     private final Connection connection;
     public CheckInDAO(Connection connection) {this.connection = connection;}
 
-    CheckInDTO checkInDTO = new CheckInDTO();
 
     // 입사 신청 정보 등록 함수
    public void submitApplication(int dormitoryId, int userId, int preference, int mealFrequency, int isSnoring, String applicationStatus) {
+       CheckInDTO checkInDTO = new CheckInDTO();
 
        checkInDTO.setDormitoryId(dormitoryId);
        checkInDTO.setUserId(userId);
@@ -22,12 +22,14 @@ public class CheckInDAO {
        checkInDTO.setApplicationStatus(applicationStatus);
        checkInDTO.setApplicationDate(LocalDate.now());
 
+
+       int id = checkInDTO.getUserId();
         String insertQuery = "INSERT INTO application (dormitory_id, student_id, preference, application_status ,meal_frequency, application_date) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(insertQuery)) {
             stmt.setInt(1, checkInDTO.getDormitoryId());
-            stmt.setInt(2, checkInDTO.getUserId());
+            stmt.setInt(2, id);
             stmt.setInt(3, checkInDTO.getPreference());
             stmt.setString(4, checkInDTO.getApplicationStatus());
             stmt.setInt(5, checkInDTO.getMealFrequency());
@@ -39,7 +41,7 @@ public class CheckInDAO {
 
             try (PreparedStatement stmt2 = connection.prepareStatement(updateQuery)) {
                 stmt2.setInt(1, checkInDTO.getIsSnoring());
-                stmt2.setInt(2, checkInDTO.getUserId());
+                stmt2.setInt(2, id);
 
                 stmt2.executeUpdate();
             }
@@ -51,6 +53,8 @@ public class CheckInDAO {
     
     // 입사신청자 정보 목록 전송 함수
     public ArrayList<CheckInDTO> getApplicationList() {
+        CheckInDTO checkInDTO = new CheckInDTO();
+
 
         ArrayList<CheckInDTO> applicationList = new ArrayList<>();
 
@@ -67,9 +71,6 @@ public class CheckInDAO {
                 checkInDTO.setUserId(rs.getInt("student_id"));
                 checkInDTO.setPreference(rs.getInt("preference"));
                 checkInDTO.setApplicationStatus(rs.getString("application_status"));
-                checkInDTO.setMealFrequency(rs.getInt("meal_frequency"));
-                checkInDTO.setMealFrequency(rs.getInt("meal_frequency"));
-                checkInDTO.setMealFrequency(rs.getInt("meal_frequency"));
                 checkInDTO.setMealFrequency(rs.getInt("meal_frequency"));
                 checkInDTO.setApplicationDate(rs.getDate("application_date").toLocalDate());
 
@@ -91,6 +92,8 @@ public class CheckInDAO {
 
     // 입사자 선발에 필요한 데이터 전송
     public ArrayList<CheckInDTO> getApplicationStudentInfo() {
+        CheckInDTO checkInDTO = new CheckInDTO();
+
 
         ArrayList<CheckInDTO> resultList = new ArrayList<>();
 
@@ -118,6 +121,7 @@ public class CheckInDAO {
 
     //입사 상태 바꾸기
     public void updateApplicationStatus(int userId, String applicationStatus) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
         checkInDTO.setUserId(userId);
         checkInDTO.setApplicationStatus(applicationStatus);
@@ -136,6 +140,7 @@ public class CheckInDAO {
 
     //호실 배정하기.
     public void updatePassedAndDormitory(int userId, int personalRoomId) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
         // 1. application 테이블에서 id에 해당하는 student_id의 application_id를 추출
 
@@ -199,6 +204,7 @@ public class CheckInDAO {
 
     // 그 학생의 생활관 비용 조회하여 추출
     public ArrayList<CheckInDTO> getDormitoryAndMealInfoByStudentId(int userId) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
         checkInDTO.setUserId(userId);
 
@@ -235,6 +241,7 @@ public class CheckInDAO {
 
     //납부상태로 바꾸기
     public void updatePaymentStatus(int userId, int dormitoryId) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
        checkInDTO.setUserId(userId);
        checkInDTO.setDormitoryId(dormitoryId);
@@ -264,8 +271,9 @@ public class CheckInDAO {
     }
 
 
-    // 결핵진단서 제출
+    // 결핵진단서 이미지 파일 제출
     public void saveStudentImage(int userId, byte[] image) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
         checkInDTO.setUserId(userId);
 
@@ -285,6 +293,7 @@ public class CheckInDAO {
 
     //결핵 진단서 제출 확인
     public String checkStudentImageSubmitted(int userId) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
         checkInDTO.setUserId(userId);
 
@@ -316,6 +325,7 @@ public class CheckInDAO {
 
     // 생활관 비용 납부자&미납부자 생활관 별로 조회
     public ArrayList<CheckInDTO> getDormitoryPaymentStatusList(int dormitoryId, String isPayment) {
+        CheckInDTO checkInDTO = new CheckInDTO();
 
        checkInDTO.setDormitoryId(dormitoryId);
        checkInDTO.setIsPayment(isPayment);

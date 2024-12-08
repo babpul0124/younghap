@@ -10,10 +10,9 @@ public class DormitoryDAO {
     private final Connection connection;
     public DormitoryDAO(Connection connection) { this.connection = connection;}
 
-    DormitoryDTO dormitoryDTO = new DormitoryDTO();
-
     // 이벤트 등록 함수
     public void eventRegistration(int userId, LocalDateTime startDate, LocalDateTime endDate, String eventName, LocalDate writedDate) {
+        DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         dormitoryDTO.setUserId(userId);
         dormitoryDTO.setStartDate(startDate);
@@ -38,6 +37,8 @@ public class DormitoryDAO {
 
     // 선발 일정 목록 전송 함수
     public ArrayList<DormitoryDTO> eventList() {
+        DormitoryDTO dormitoryDTO = new DormitoryDTO();
+
 
         ArrayList<DormitoryDTO> eventList = new ArrayList<>();
 
@@ -66,6 +67,7 @@ public class DormitoryDAO {
 
     // 기숙사별 생활관 사용료, 급식비 등록 함수
     public void dormitoryFeeRegistration(String dormitoryName, int roomCapacityNum, int dormitoryFee, int mealFrequency, int mealMoney) {
+        DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         dormitoryDTO.setDormitoryName(dormitoryName);
         dormitoryDTO.setRoomCapacityNum(roomCapacityNum);
@@ -104,6 +106,7 @@ public class DormitoryDAO {
 
     // 생활관 사용료 및 급식비 목록 전송 함수
     public ArrayList<DormitoryDTO> getAllDormitoryFee() {
+        DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         ArrayList<DormitoryDTO> dormitoryFeeList = new ArrayList<>();
 
@@ -133,6 +136,7 @@ public class DormitoryDAO {
 
     // 생활관 목록 전송 함수
     public ArrayList<DormitoryDTO> getDormitoryInfo() {
+        DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         ArrayList<DormitoryDTO> dormitoryInfo = new ArrayList<>();
 
@@ -141,7 +145,6 @@ public class DormitoryDAO {
         try(PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery())
         {
             while (rs.next()) {
-                DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
                 dormitoryDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));

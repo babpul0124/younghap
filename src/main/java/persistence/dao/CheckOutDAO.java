@@ -10,10 +10,9 @@ public class CheckOutDAO {
     private final Connection connection;
     public CheckOutDAO(Connection connection) {this.connection = connection;}
 
-    CheckOutDTO checkOutDTO = new CheckOutDTO();
-
     // 퇴실 신청 권한 확인 (1) 상태가 승인인 학생아이디 리스트 전송
     public ArrayList<CheckOutDTO> getApprovedStudentIds() {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         ArrayList<CheckOutDTO> approvedStudentIds = new ArrayList<>();
 
@@ -34,6 +33,7 @@ public class CheckOutDAO {
 
     //  퇴실 신청 권한 확인 (2) check_out 테이블에 있는 학생아이디 리스트 전송.
     public ArrayList<CheckOutDTO> getStudentIdsFromCheckOut() {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         ArrayList<CheckOutDTO> studentIds = new ArrayList<>();
 
@@ -54,6 +54,7 @@ public class CheckOutDAO {
 
     // 퇴사 신청 받아서 db에 저장.
     public void processStudentCheckOut(int userId, LocalDateTime checkOutDate, String bankName, String accountNum) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         checkOutDTO.setUserId(userId);
         checkOutDTO.setCheckOutDate(checkOutDate);
@@ -107,6 +108,7 @@ public class CheckOutDAO {
 
     // 학생 아이디로 dormitory_id를 찾는 메서드
     private int getDormitoryIdByStudentId(int userId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         int findDormitoryId = 0;
         checkOutDTO.setUserId(userId);
@@ -135,6 +137,7 @@ public class CheckOutDAO {
 
     // 퇴사 신청자 조회
     public ArrayList<CheckOutDTO> getCheckOutListByDormitoryId(int dormitoryId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         checkOutDTO.setDormitoryId(dormitoryId);
 
@@ -166,6 +169,8 @@ public class CheckOutDAO {
 
     // 환불 상태 바꾸는 함수
     public void updateCheckOutStatus(int userId, String checkOutStatus) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
+
 
         checkOutDTO.setUserId(userId);
         checkOutDTO.setCheckOutStatus(checkOutStatus);
@@ -184,6 +189,7 @@ public class CheckOutDAO {
 
     // 사용자의 환불 확인
     public ArrayList<CheckOutDTO> getCheckOutInfoByStudentId(int userId) {
+        CheckOutDTO checkOutDTO = new CheckOutDTO();
 
         checkOutDTO.setUserId(userId);
 
