@@ -1,29 +1,35 @@
 package persistence.dao;
-import persistence.dto.UserDTO;
-import persistence.dto.EventDTO;
-import persistence.dto.DormitoryDTO;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import persistence.dto.DormitoryDTO;
 
 public class DormitoryDAO {
 
     private final Connection connection;
     public DormitoryDAO(Connection connection) { this.connection = connection;}
 
+    DormitoryDTO dormitoryDTO = new DormitoryDTO();
+
     // 이벤트 등록 함수
-    public void eventRegistration(int id, LocalDateTime startDate, LocalDateTime endDate, String eventName, LocalDate writedDate) {
+    public void eventRegistration(int userId, LocalDateTime startDate, LocalDateTime endDate, String eventName, LocalDate writedDate) {
+
+        dormitoryDTO.setUserId(userId);
+        dormitoryDTO.setStartDate(startDate);
+        dormitoryDTO.setEndDate(endDate);
+        dormitoryDTO.setEventName(eventName);
+        dormitoryDTO.setWritedDate(writedDate);
 
         String query = "INSERT INTO event_schedule (user_id, start_date, end_date, event_name, writed_date) " + "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query))
         {
-            stmt.setInt(1, id); // 실제 관리자 id
-            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(startDate));
-            stmt.setTimestamp(3, java.sql.Timestamp.valueOf(endDate));
-            stmt.setString(4, eventName);
-            stmt.setDate(5, java.sql.Date.valueOf(writedDate));
+            stmt.setInt(1, dormitoryDTO.getUserId()); // 실제 관리자 id
+            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(dormitoryDTO.getStartDate()));
+            stmt.setTimestamp(3, java.sql.Timestamp.valueOf(dormitoryDTO.getEndDate()));
+            stmt.setString(4, dormitoryDTO.getEventName());
+            stmt.setDate(5, java.sql.Date.valueOf(dormitoryDTO.getWritedDate()));
 
             stmt.executeUpdate();
         }
@@ -31,9 +37,9 @@ public class DormitoryDAO {
     }
 
     // 선발 일정 목록 전송 함수
-    public ArrayList<EventDTO> getEvents() {
+    public ArrayList<DormitoryDTO> eventList() {
 
-        ArrayList<EventDTO> eventList = new ArrayList<>();
+        ArrayList<DormitoryDTO> eventList = new ArrayList<>();
 
         String query = "SELECT e.start_date, e.end_date, e.event_name, e.writed_date, u.name " +
                        "FROM event_schedule e " +
@@ -44,15 +50,13 @@ public class DormitoryDAO {
         {
             while (rs.next()) {
 
-                EventDTO eventDTO = new EventDTO();
+                dormitoryDTO.setStartDate(rs.getTimestamp("start_date").toLocalDateTime());
+                dormitoryDTO.setEndDate(rs.getTimestamp("end_date").toLocalDateTime());
+                dormitoryDTO.setEventName(rs.getString("event_name"));
+                dormitoryDTO.setWritedDate(rs.getDate("writed_date").toLocalDate());
+                dormitoryDTO.setUserName(rs.getString("name"));
 
-                eventDTO.setStartDate(rs.getTimestamp("start_date").toLocalDateTime());
-                eventDTO.setEndDate(rs.getTimestamp("end_date").toLocalDateTime());
-                eventDTO.setEventName(rs.getString("event_name"));
-                eventDTO.setWritedDate(rs.getDate("writed_date").toLocalDate());
-                eventDTO.setName(rs.getString("name"));
-
-                eventList.add(eventDTO);  // 조회된 EventDTO를 리스트에 추가
+                eventList.add(dormitoryDTO);  // 조회된 EventDTO를 리스트에 추가
             }
         }
         catch (SQLException e) { System.out.println("error: " + e);}
@@ -61,15 +65,21 @@ public class DormitoryDAO {
     }
 
     // 기숙사별 생활관 사용료, 급식비 등록 함수
-    public void dormitoryFeeRegistration(String dormitoryName, int roomCapacityNum, int dormitoryFee, int mealFrequency, int money) {
+    public void dormitoryFeeRegistration(String dormitoryName, int roomCapacityNum, int dormitoryFee, int mealFrequency, int mealMoney) {
+
+        dormitoryDTO.setDormitoryName(dormitoryName);
+        dormitoryDTO.setRoomCapacityNum(roomCapacityNum);
+        dormitoryDTO.setDormitoryFee(dormitoryFee);
+        dormitoryDTO.setMealFrequency(mealFrequency);
+        dormitoryDTO.setMealMoney(mealMoney);
 
         String query1 = "INSERT INTO dormitory (dormitory_name, room_capacity_num, dormitory_fee) VALUES (?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query1))
         {
-            stmt.setString(1, dormitoryName);
-            stmt.setInt(2,roomCapacityNum);
-            stmt.setInt(3,dormitoryFee);
+            stmt.setString(1, dormitoryDTO.getDormitoryName());
+            stmt.setInt(2,dormitoryDTO.getRoomCapacityNum());
+            stmt.setInt(3,dormitoryDTO.getDormitoryFee());
 
             stmt.executeUpdate();
         }
@@ -82,10 +92,10 @@ public class DormitoryDAO {
 
         try (PreparedStatement stmt2 = connection.prepareStatement(query2))
         {
-            stmt2.setInt(1, mealFrequency);
-            stmt2.setInt(2, money);
-            stmt2.setString(3, dormitoryName);
-            stmt2.setInt(4, roomCapacityNum);
+            stmt2.setInt(1, dormitoryDTO.getMealFrequency());
+            stmt2.setInt(2, dormitoryDTO.getMealMoney());
+            stmt2.setString(3, dormitoryDTO.getDormitoryName());
+            stmt2.setInt(4, dormitoryDTO.getRoomCapacityNum());
 
             stmt2.executeUpdate();
         }
@@ -105,11 +115,9 @@ public class DormitoryDAO {
         {
             while (rs.next()) {
 
-                DormitoryDTO dormitoryDTO = new DormitoryDTO();
-
                 dormitoryDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 dormitoryDTO.setMealFrequency(rs.getInt("meal_frequency"));
-                dormitoryDTO.setMoney(rs.getInt("money"));
+                dormitoryDTO.setMealMoney(rs.getInt("money"));
                 dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));
                 dormitoryDTO.setRoomCapacityNum(rs.getInt("room_capacity_num"));
                 dormitoryDTO.setDormitoryFee(rs.getInt("dormitory_fee"));
@@ -137,7 +145,7 @@ public class DormitoryDAO {
 
                 dormitoryDTO.setDormitoryId(rs.getInt("dormitory_id"));
                 dormitoryDTO.setDormitoryName(rs.getString("dormitory_name"));
-                dormitoryDTO.setCapacityNum(rs.getInt("room_capacity_num"));
+                dormitoryDTO.setRoomCapacityNum(rs.getInt("room_capacity_num"));
 
                 dormitoryInfo.add(dormitoryDTO);
             }
