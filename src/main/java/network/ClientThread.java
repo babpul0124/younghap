@@ -33,7 +33,7 @@ public class ClientThread extends Thread {
             OutputStream os = clientSocket.getOutputStream();
 
             br = new BufferedReader(new InputStreamReader(is));
-            bw = new PrintWriter(new OutputStreamWriter(os), true);
+            pw = new PrintWriter(new OutputStreamWriter(os), true);
             dos = new DataOutputStream(os); // dos 초기화
 
             while (is.read(readBuf) != -1) {
