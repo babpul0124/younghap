@@ -12,18 +12,17 @@ public class ClientThread extends Thread {
     private PrintWriter bw;
     private DataOutputStream dos; // DataOutputStream 추가
 
-    private final Socket clientSocket;
-    private final UserService userService;
-    private final Viewer viewer;
+    private int id;
+    private UserDTO user;
 
+    private final Socket clientSocket;
     private final int BUF_SIZE = 1024;
     private byte[] readBuf = new byte[BUF_SIZE];
     private Protocol send_protocol;
 
-    public ClientThread(Socket clientSocket, UserService userService, Viewer viewer) {
+    public ClientThread(Socket clientSocket, int id) {
         this.clientSocket = clientSocket;
-        this.userService = userService;
-        this.viewer = viewer;
+        this.id = id;
     }
 
     @Override
