@@ -25,6 +25,7 @@ public class Client {
             System.err.println(e);
         }
     }
+
     public void exit() {
         try{
             cliSocket.close();
@@ -32,6 +33,7 @@ public class Client {
             System.out.println(e);
         }
     }
+
     public void run() throws IOException {
         while(true){
             me = con.login();
@@ -72,7 +74,7 @@ public class Client {
                     con.registDormitory_feeAndmeal();
                     break;
                 case APPLICATION_VIEW:
-                    con.viewApplication();
+                    con.viewApplicationList();
                     break;
                 case SELECTION_AND_ALLOCATION_OF_ROOMS_REQUEST:
                     con.requestSelectionAndAllocationOfRooms();

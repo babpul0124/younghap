@@ -211,7 +211,6 @@ public class ClientController {
     }
 
     public void requestSelectionAndAllocationOfRooms() throws IOException {
-
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.ROOM_ASSIGNMENT, 0, null);
         dos.write(viewRequest.getBytes());
 
@@ -261,7 +260,7 @@ public class ClientController {
 
     public void viewPayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<paymentListDTO> paymentListDTOs = new ArrayList<>();
+        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -284,11 +283,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                paymentListDTOs.add((paymentListDTO) new Protocol(readBuf).getData());
+                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewPaymentListDTOs(paymentListDTOs);
+                        viewer.viewPaymentListDTOs(ApplicationListDTOs);
                     }
                 }
             }
@@ -297,7 +296,7 @@ public class ClientController {
 
     public void viewUnpayersForDormitoryFee() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<paymentListDTO> paymentListDTOs = new ArrayList<>();
+        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());
@@ -320,11 +319,11 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                paymentListDTOs.add((paymentListDTO) new Protocol(readBuf).getData());
+                                ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
                                 send_ack();
                             }
                         }
-                        viewer.viewUnpaymentListDTOs(paymentListDTOs);
+                        viewer.viewUnpaymentListDTOs(ApplicationListDTOs);
                     }
                 }
             }
@@ -360,7 +359,7 @@ public class ClientController {
                                 send_ack();
                             }
                         }
-                        viewer.viewApplicationListDTOs(ApplicationListDTOs);
+                        viewer.viewTuberculosisCertificaterList(ApplicationListDTOs);
                     }
                 }
             }
@@ -369,7 +368,6 @@ public class ClientController {
 
     public void viewCheck_out_ApplicantAndRequest() throws IOException {
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
-        ArrayList<CheckOutDTO> CheckOutDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_LIST_QUERY, 0, null);
         dos.write(viewRequest.getBytes());

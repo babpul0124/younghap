@@ -1,8 +1,8 @@
 package network;
 
-import org.testng.internal.collections.Pair;
+//import org.testng.internal.collections.Pair;
 import persistence.dto.*;
-import persistence.enums.User_role;
+//import persistence.enums.User_role;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -125,16 +125,16 @@ public class Viewer {
         System.out.println();
     }
 
-    public void viewPaymentListDTOs(ArrayList<paymentListDTO> DTOs) {
+    public void viewPaymentListDTOs(ArrayList<ApplicationListDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            System.out.println("[" + i + "] " + DTOToString.PaymentListDTOToString(DTOs.get(i)));
+            System.out.println("[" + i + "] " + DTOToString.PaymentListToString(DTOs.get(i)));
         }
         System.out.println();
     }
 
-    public void viewUnpaymentListDTOs(ArrayList<paymentListDTO> DTOs) {
+    public void viewUnpaymentListDTOs(ArrayList<ApplicationListDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            System.out.println("[" + i + "] " + DTOToString.PaymentListDTOToString(DTOs.get(i)));
+            System.out.println("[" + i + "] " + DTOToString.PaymentListToString(DTOs.get(i)));
         }
         System.out.println();
     }
@@ -142,8 +142,15 @@ public class Viewer {
     public void viewPassed(ArrayList<ApplicationListDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             if(DTOs.get(i).getApplicationDTO().getApplicationStatus().equals(ApplicationDTO.ApplicationStatus.승인)){
-                System.out.println("[" + i + "] " + DTOToString.ApplicationListDTOToString(DTOs.get(i)));
+                System.out.println("[" + i + "] " + DTOToString.PassedApplicationListDTOToString(DTOs.get(i)));
             }
+        }
+        System.out.println();
+    }
+
+    public void viewTuberculosisCertificaterList(ArrayList<ApplicationListDTO> DTOs) {
+        for(int i = 0; i < DTOs.size(); i++) {
+            System.out.println("[" + i + "] " + DTOToString.TuberculosisCertificaterListToString(DTOs.get(i)));
         }
         System.out.println();
     }
@@ -162,7 +169,7 @@ public class Viewer {
 
     public void viewEventDTO(ArrayList<EventDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            System.out.println("[" + i + "] " + DTOToString.viewEventDTOToString(DTOs.get(i)));
+            System.out.println("[" + i + "] " + DTOToString.event_scheduleDTOToString(DTOs.get(i)));
         }
         System.out.println();
     }
