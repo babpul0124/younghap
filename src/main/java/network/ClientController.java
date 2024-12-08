@@ -456,6 +456,7 @@ public class ClientController {
     }
 
     public void requestApplicationRegist(UserDTO me) throws IOException {
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
         ArrayList<DormitoryDTO> DormitoryDTOs = new ArrayList<>();
 
         Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.COST_QUERY, 0, null);
@@ -471,17 +472,12 @@ public class ClientController {
                     }
                 }
                 viewer.viewDormitoryDTOs(DormitoryDTOs);
-                DormitoryDTO dormitoryDTO = viewer.applicationInfo(me);
+                CheckInDTO CheckInDTO = viewer.applicationInfo(me);
                 Protocol respondApplicationInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_APPLICATION_INFO,
-                        (applicationInfo[0].getBytes().length +
-                         applicationInfo[1].getBytes().length +
-                         applicationInfo[2].getBytes().length +
-                         applicationInfo[3].getBytes().length +
-                         applicationInfo[4].getBytes().length
-                        ),
-                        applicationInfo
+                        0,
+                        CheckInDTO
                 );
                 dos.write(respondApplicationInfo.getBytes());
 
@@ -500,9 +496,9 @@ public class ClientController {
     }
 
     public void viewPassed(UserDTO me) throws IOException {
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SELECTION_RESULT_ROOM_QUERY, Integer.BYTES , me.getId());
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SELECTION_RESULT_ROOM_QUERY, 0, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
@@ -511,10 +507,10 @@ public class ClientController {
                 int dataCount = Deserializer.byteArrayToInt(readBuf);
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
-                        ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                        CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                     }
                 }
-                viewer.viewPassed(ApplicationListDTOs);
+                viewer.viewPassed(CheckInDTOs);
             }else{
                 System.out.println("합격 정보가 존재하지 않습니다.");
             }
@@ -522,9 +518,9 @@ public class ClientController {
     }
 
     public void viewDormitoryFeeAndRequestPay(UserDTO me) throws IOException {
-        ArrayList<ApplicationListDTO> ApplicationListDTOs = new ArrayList<>();
+        ArrayList<CheckInDTO> CheckInDTOs = new ArrayList<>();
 
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_COST_QUERY, Integer.BYTES, me.getId());
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.DORM_COST_QUERY, 0, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
@@ -533,17 +529,27 @@ public class ClientController {
                 int dataCount = Deserializer.byteArrayToInt(readBuf);
                 for (int i = 0; i < dataCount; i++) {
                     if (dis.read(readBuf) != -1) {
-                        ApplicationListDTOs.add((ApplicationListDTO) new Protocol(readBuf).getData());
+                        CheckInDTOs.add((CheckInDTO) new Protocol(readBuf).getData());
                     }
                 }
-                String ans = viewer.viewDormitoryFee(ApplicationListDTOs);
-                Protocol respond = new Protocol(
-                        ProtocolType.RESPOND,
-                        ProtocolCode.PAYMENT,
-                        ans.getBytes().length,
-                        ans
-                );
-                dos.write(respond.getBytes());
+                boolean ans = viewer.viewDormitoryFee(CheckInDTOs);
+                if(ans == true){
+                    Protocol respond = new Protocol(
+                            ProtocolType.RESPOND,
+                            ProtocolCode.PAYMENT,
+                            0,
+                            null
+                    );
+                    dos.write(respond.getBytes());
+                }else{
+                    Protocol respond = new Protocol(
+                            ProtocolType.RESPOND,
+                            ProtocolCode.UNPAYMENT,
+                            0,
+                            null
+                    );
+                    dos.write(respond.getBytes());
+                }
 
                 if (dis.read(readBuf) != -1) {
                     Protocol response = new Protocol(readBuf);
@@ -560,7 +566,7 @@ public class ClientController {
     }
 
     public void requestSumitTuberculosisCertificate(UserDTO me) throws IOException {
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.TUBERCULOSIS_CERTIFICATE_SUBMIT, Integer.BYTES, me);
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.TUBERCULOSIS_CERTIFICATE_SUBMIT, 0, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
@@ -604,16 +610,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.CHECK_OUT_APPLICATION) {
-                String[] check_outInfo = viewer.check_outInfo(me);
+                CheckOutDTO checkOutDTO = viewer.check_outInfo(me);
                 Protocol respondCheck_outInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_APPLICATION_INFO,
-                        (check_outInfo[0].getBytes().length +
-                                check_outInfo[1].getBytes().length +
-                                check_outInfo[2].getBytes().length +
-                                check_outInfo[3].getBytes().length
-                        ),
-                        check_outInfo
+                        0,
+                        checkOutDTO
                 );
                 dos.write(respondCheck_outInfo.getBytes());
 
@@ -634,7 +636,7 @@ public class ClientController {
     public void viewCheck_out(UserDTO me) throws IOException {
         ArrayList<CheckOutDTO> DTOs = new ArrayList<>();
 
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.REFUND_QUERY, Integer.BYTES, me.getId());
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.REFUND_QUERY, 0, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {

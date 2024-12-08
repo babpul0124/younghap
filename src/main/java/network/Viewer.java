@@ -6,6 +6,7 @@ import persistence.dto.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Viewer {
         UserDTO userInfo = new UserDTO();
 
         System.out.print("ID : ");
-        userInfo.setLogin_id(keyInput.readLine());
+        userInfo.setLoginId(keyInput.readLine());
         System.out.print("PW : ");
         userInfo.setPassword(keyInput.readLine());
 
@@ -185,32 +186,38 @@ public class Viewer {
         System.out.println();
     }
 
-    public DormitoryDTO applicationInfo(UserDTO me) throws IOException {
-        DormitoryDTO dto;
+    public CheckInDTO applicationInfo(UserDTO me) throws IOException {
+        CheckInDTO dto = new CheckInDTO();
 
-        result[0] = me + ""; //학번
+        dto.setUserId(me.getUserId()); //학번
         System.out.println("[입사 신청 정보 입력]");
         System.out.print("생활관 ID: ");
-        result[1] = keyInput.readLine();
+        dto.setDormitoryId(Integer.parseInt(keyInput.readLine()));
         System.out.print("지망: ");
-        result[2] = keyInput.readLine();
+        dto.setPreference(Integer.parseInt(keyInput.readLine()));
         System.out.print("식사 유형 (n일식): ");
-        result[3] = keyInput.readLine();
+        dto.setMealFrequency(Integer.parseInt(keyInput.readLine()));
         System.out.print("코골이 여부: ");
-        result[4] = keyInput.readLine();
+        dto.setIsSnoring(Integer.parseInt(keyInput.readLine()));
 
-        return result;
+        return dto;
     }
 
-    public String viewDormitoryFee(ArrayList<ApplicationListDTO> DTOs) throws IOException {
+    public boolean viewDormitoryFee(ArrayList<CheckInDTO> DTOs) throws IOException {
 
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.viewDormitoryFeeDIOToString(DTOs.get(i)));
         }
         System.out.println("납부하려면 납부, 아니면 N 입력: ");
         String result = keyInput.readLine();
-
-        return result;
+        if(result == "납부"){
+            return true;
+        }else if(result == "N"){
+            return false;
+        }else{
+            System.out.println("잘못된 입력입니다.");
+            return false;
+        }
     }
 
     public String image_pathInfo() throws IOException {
@@ -218,25 +225,28 @@ public class Viewer {
         return keyInput.readLine();
     }
 
-    public String[] check_outInfo(UserDTO me) throws IOException {
-        String[] result = new String[4];
+    public CheckOutDTO check_outInfo(UserDTO me) throws IOException {
+        CheckOutDTO dto = new CheckOutDTO();
 
-        result[0] = me.getId() + ""; //학번
+        dto.setUserId(me.getUserId());
         System.out.println("[퇴사 신청 정보 입력]");
-        System.out.print("퇴사일: ");
-        result[1] = keyInput.readLine();
+        System.out.print("퇴사일(yyyy-mm-dd hh:mm:ss): ");
+        String checkOutDate = keyInput.readLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(checkOutDate, formatter);
+        dto.setCheckOutDate(dateTime);
         System.out.print("환불 은행: ");
-        result[2] = keyInput.readLine();
+        dto.setBankName(keyInput.readLine());
         System.out.print("환불 계좌: ");
-        result[3] = keyInput.readLine();
+        dto.setAccountNum(keyInput.readLine());
 
-        return result;
+        return dto;
     }
+
     public void viewCheckOutDTOs(ArrayList<CheckOutDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.viewCheckOutDTOToString(DTOs.get(i)));
         }
         System.out.println();
     }
-
 }

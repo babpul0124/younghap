@@ -11,6 +11,7 @@ public class ProtocolCode {
   static final byte SELECTION_RESULT_ROOM_QUERY = 0x07;  // 합격 여부 및 호실 조회
   static final byte DORM_COST_QUERY = 0x08;         // 생활관 비용 조회
   static final byte PAYMENT = 0x09;                   // 납부
+  static final byte UNPAYMENT = 0x21;
   static final byte TUBERCULOSIS_CERTIFICATE_SUBMIT = 0x0A;  // 결핵진단서 제출
   static final byte TUBERCULOSIS_CERTIFICATE_UPLOAD = 0x0B; // 결핵진단서 업로드
   static final byte CHECK_OUT_APPLICATION = 0x0C;    // 퇴사 신청
