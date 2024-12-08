@@ -19,32 +19,6 @@ public class UserService {
         return loginDAO.getIdPwList();
     }
 
-    // 아이디와 비밀번호를 저장하는 메서드
-    public boolean registerUser(String loginId, String password) {
-        try {
-            // 아이디 중복 검사 (중복된 아이디가 있는지 확인)
-            if (isIdExists(loginId)) {
-                return false;  // 아이디가 이미 존재하면 등록 실패
-            }
-            loginDAO.saveIdPw(loginId, password);
-            return true;  // 등록 성공
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;  // 예외가 발생하면 등록 실패
-        }
-    }
-
-    // 사용자 아이디가 이미 존재하는지 확인하는 메서드
-    private boolean isIdExists(String loginId) {
-        ArrayList<LoginDTO> userIdPwList = loginDAO.getIdPwList();
-        for (LoginDTO user : userIdPwList) {
-            if (user.getLoginId().equals(loginId)) {
-                return true;  // 아이디가 존재하면 true 반환
-            }
-        }
-        return false;  // 아이디가 존재하지 않으면 false 반환
-    }
-
     // 아이디와 비밀번호로 사용자를 인증하는 메서드
     public String validateUser(String loginId, String password) {
         ArrayList<LoginDTO> userIdPwList = loginDAO.getIdPwList();
@@ -73,7 +47,8 @@ public class UserService {
             if (loginDTO.getLoginId().equals(loginId)) {
                 UserDTO userDTO = new UserDTO();
                 userDTO.setLoginId(loginDTO.getLoginId());
-                userDTO.setUserRole("학생");  // 데이터베이스에서 실제 userRole을 가져오도록 수정 필요
+                // 실제 userRole을 데이터베이스에서 가져오도록 수정 필요
+                userDTO.setUserRole("학생");  // 여기서는 예시로 "학생"을 설정
                 return userDTO;
             }
         }
