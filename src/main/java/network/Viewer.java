@@ -70,46 +70,46 @@ public class Viewer {
         System.out.print("입력 : ");
     }
 
-    public EventDTO getEvent_scheduleInfo(BufferedReader keyInput) throws IOException {
-        EventDTO DTOs = new EventDTO();
+    public DormitoryDTO getEvent_scheduleInfo(BufferedReader keyInput) throws IOException {
+        DormitoryDTO dto = new DormitoryDTO();
         System.out.println("[선발 일정 등록]");
         System.out.print("일정 제목 : ");
-        DTOs.setEventName(keyInput.readLine());
+        dto.setEventName(keyInput.readLine());
         System.out.print("시작일(yyyy-mm-dd hh:mm:ss): ");
         String startDate = keyInput.readLine();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime dateTime = LocalDateTime.parse(startDate, formatter);
-        DTOs.setStartDate(dateTime);
+        dto.setStartDate(dateTime);
         System.out.print("종료일(yyyy-mm-dd hh:mm:ss): ");
         String endDate = keyInput.readLine();
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         dateTime = LocalDateTime.parse(endDate, formatter);
-        DTOs.setStartDate(dateTime);
+        dto.setStartDate(dateTime);
 
-        return DTOs;
+        return dto;
     }
 
-    public void viewEvent_scheduleDTOs(ArrayList<EventDTO> DTOs) {
+    public void viewEvent_scheduleDTOs(ArrayList<DormitoryDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.event_scheduleDTOToString(DTOs.get(i)));
         }
         System.out.println();
     }
 
-    public String[] getDormitory_feeAndmealInfo() throws IOException {
-        String[] result = new String[4];
+    public DormitoryDTO getDormitory_feeAndmealInfo() throws IOException {
+        DormitoryDTO dto =  new DormitoryDTO();
 
         System.out.println("[생활관 사용료 및 급식비 등록]");
         System.out.print("생활관명 : ");
-        result[0] = keyInput.readLine();
+        dto.setDormitoryName(keyInput.readLine());
         System.out.print("생활관비 : ");
-        result[1] = keyInput.readLine();
+        dto.setDormitoryFee(Integer.parseInt(keyInput.readLine()));
         System.out.print("식사 유형 (n일식)  : ");
-        result[2] = keyInput.readLine();
+        dto.setMealFrequency(Integer.parseInt(keyInput.readLine()));
         System.out.print("급식비  : ");
-        result[3] = keyInput.readLine();
+        dto.setMealFrequency(Integer.parseInt(keyInput.readLine()));
 
-        return result;
+        return dto;
     }
 
     public void viewDormitoryDTOs(ArrayList<DormitoryDTO> DTOs) {
@@ -119,10 +119,12 @@ public class Viewer {
         System.out.println();
     }
 
-    public int getDormitory_id(ArrayList<DormitoryDTO> DTOs) throws IOException {
+    public DormitoryDTO getDormitory_id(ArrayList<DormitoryDTO> DTOs) throws IOException {
         viewDormitoryDTOs(DTOs);
+        DormitoryDTO dto = new DormitoryDTO();
         System.out.println("조회할 생활관 ID 입력: ");
-        return Integer.parseInt(keyInput.readLine());
+        dto.setDormitoryId(Integer.parseInt(keyInput.readLine()));
+        return dto;
     }
 
     public void viewApplicationListDTOs(ArrayList<ApplicationListDTO> DTOs) {

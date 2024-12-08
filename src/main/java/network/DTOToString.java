@@ -4,7 +4,7 @@ import persistence.dto.*;
 
 public class DTOToString {
 
-    public static String event_scheduleDTOToString(EventDTO dto) {
+    public static String event_scheduleDTOToString(DormitoryDTO dto) {
         return "일정 : " + dto.getEventName()
                 + " | 시작일: " + dto.getStartDate()
                 + " | 종료일: " + dto.getEndDate() + "\n";

@@ -45,7 +45,7 @@ public class ClientController {
 
                     if (protocol.getCode() == ProtocolCode.ID_PWD) {
                         UserDTO user = viewer.loginScreen(keyInput);
-                        Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.ID_PWD, (user.getLogin_id().getBytes().length + user.getPassword().getBytes().length + 8), user);
+                        Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.ID_PWD, 0, user);
                         dos.write(respond_login.getBytes());
 
                         UserDTO me = null;
@@ -96,8 +96,8 @@ public class ClientController {
     }
 
     public void registEvent_schedule() throws IOException {
-        ArrayList<EventDTO> DTOs = new ArrayList<>();
-        EventDTO DTO;
+        ArrayList<DormitoryDTO> DTOs = new ArrayList<>();
+        DormitoryDTO DTO;
 
         Protocol registRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.SCHEDULE_REGISTER, 0, null);
         dos.write(registRequest.getBytes());
@@ -109,7 +109,7 @@ public class ClientController {
                 Protocol respond_event_scheduleInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_SCHEDULE_INFO,
-                        (byte) DTO,
+                        0,
                         DTO
                 );
                 dos.write(respond_event_scheduleInfo.getBytes());
@@ -120,8 +120,7 @@ public class ClientController {
                         int dataCount = Deserializer.byteArrayToInt(readBuf);
                         for (int i = 0; i < dataCount; i++) {
                             if (dis.read(readBuf) != -1) {
-                                DTOs.add((EventDTO) new Protocol(readBuf).getData());
-                                send_ack();
+                                DTOs.add((DormitoryDTO) new Protocol(readBuf).getData());
                             }
                         }
                         viewer.viewEvent_scheduleDTOs(DTOs);
@@ -142,15 +141,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.RESPONSE_FEE_INFO) {
-                String[] Dormitory_feeAndmealInfo = viewer.getDormitory_feeAndmealInfo();
+                DormitoryDTO DTO = viewer.getDormitory_feeAndmealInfo();
                 Protocol respondDormitory_feeAndmealInfo = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.RESPONSE_FEE_INFO,
-                        (byte) (Dormitory_feeAndmealInfo[0].getBytes().length +
-                                Dormitory_feeAndmealInfo[1].getBytes().length +
-                                Dormitory_feeAndmealInfo[2].getBytes().length +
-                                Dormitory_feeAndmealInfo[3].getBytes().length),
-                        Dormitory_feeAndmealInfo
+                        0,
+                        DTO
                 );
                 dos.write(respondDormitory_feeAndmealInfo.getBytes());
 
@@ -339,12 +335,12 @@ public class ClientController {
         if (dis.read(readBuf) != -1) {
             Protocol protocol = new Protocol(readBuf);
             if (protocol.getCode() == ProtocolCode.DORM_LIST_QUERY) {
-                int Dormitory_id = viewer.getDormitory_id(DormitoryDTOs);
+                DormitoryDTO dto = viewer.getDormitory_id(DormitoryDTOs);
                 Protocol respondDormitory_id = new Protocol(
                         ProtocolType.RESPOND,
                         ProtocolCode.TUBERCULOSIS_CERTIFICATE_QUERY,
                         Integer.BYTES,
-                        Dormitory_id
+                        dto
                 );
                 dos.write(respondDormitory_id.getBytes());
 
@@ -577,7 +573,7 @@ public class ClientController {
     }
 
     public void requestSumitTuberculosisCertificate(UserDTO me) throws IOException {
-        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.TUBERCULOSIS_CERTIFICATE_SUBMIT, Integer.BYTES, me.getId());
+        Protocol viewRequest = new Protocol(ProtocolType.REQUEST, ProtocolCode.TUBERCULOSIS_CERTIFICATE_SUBMIT, Integer.BYTES, me);
         dos.write(viewRequest.getBytes());
 
         if (dis.read(readBuf) != -1) {
