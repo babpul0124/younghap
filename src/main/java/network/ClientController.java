@@ -405,8 +405,7 @@ public class ClientController {
             if (protocol.getCode() == ProtocolCode.SCHEDULE_COST_QUERY) {
                 int selectScheduleOrCost = viewer.getSelectScheduleOrCost();
                 if(selectScheduleOrCost == 1){
-                    Protocol respondMenu = new Protocol(
-                            ProtocolType.RESPOND,
+                    Protocol respondMenu = new Protocol(ProtocolType.RESPOND,
                             ProtocolCode.SCHEDULE_QUERY,
                             0,
                             null

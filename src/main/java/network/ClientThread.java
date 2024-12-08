@@ -8,6 +8,7 @@ import network.Protocol;
 import java.io.*;
 import java.net.Socket;
 import java.sql.*;
+import java.util.List;
 
 public class ClientThread extends Thread {
   private BufferedReader br;
@@ -63,11 +64,16 @@ public class ClientThread extends Thread {
     if (type == ProtocolType.REQUEST) {
       if (code == ProtocolCode.CONNECT) {
         user_connect();
-
+      } else if (code == ProtocolCode.SCHEDULE_COST_QUERY) {
+        viewScheduleMenu();
       }
     } else if (type == ProtocolType.RESPOND) {
       if (code == ProtocolCode.ID_PWD) {
         user_logIn((LoginDTO) data);
+      } else if (code == ProtocolCode.SCHEDULE_QUERY) {
+        viewSchedule();
+      } else if (code == ProtocolCode.COST_QUERY) {
+        viewDormitoryCost();
       }
 
     } else {
@@ -87,6 +93,21 @@ public class ClientThread extends Thread {
     } else
       send_protocol = new Protocol(ProtocolType.RESULT, ProtocolCode.FAILURE, 0, null);
     dos.write(send_protocol.getBytes());
+  }
+
+  private void viewScheduleMenu() throws IOException {
+    send_protocol = new Protocol(ProtocolType.RESPOND, ProtocolCode.SCHEDULE_COST_QUERY, 0, null);
+    dos.write(send_protocol.getBytes());
+  }
+
+  private void viewSchedule() throws IOException {
+    List<DormitoryDTO> totalScheduleDTOs = userService.viewEvent();
+    dos.write(Serializer.intToByteArray(totalScheduleDTOs.size()));
+  }
+
+  private void viewDormitoryCost() throws IOException {
+    List<DormitoryDTO> totalCostDTOs = userService.viewCost();
+    dos.write(Serializer.intToByteArray(totalCostDTOs.size()));
   }
 }
 

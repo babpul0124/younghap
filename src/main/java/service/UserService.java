@@ -3,6 +3,9 @@ package service;
 import persistence.dao.*;
 import persistence.dto.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserService {
     private CheckInDAO checkInDao;
     private CheckOutDAO checkOutDao;
@@ -18,5 +21,14 @@ public class UserService {
 
     public UserDTO login(LoginDTO logInDto) {
         return loginDao.selectLogInUser(logInDto);
+    }
+
+
+    public List<DormitoryDTO> viewEvent() {
+        return dormitoryDao.selectAllEventList();
+    }
+
+    public List<DormitoryDTO> viewCost() {
+        return dormitoryDao.selectAllDormitoryFee();
     }
 }

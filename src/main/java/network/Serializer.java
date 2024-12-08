@@ -102,12 +102,8 @@ public class Serializer {
         }
       }
     }
-
     return byteListToArray(result);
   }
-
-
-
 
   public static byte[] bitsToByteArray(byte val1, byte val2) {
     return new byte[] { val1, val2 };
@@ -167,9 +163,6 @@ public class Serializer {
     return resultArray;
   }
 
-
-
-  /* util */
   public static void addArrList(ArrayList<Byte> result, byte[] arr) {
     for(int j = 0; j < arr.length; j++) {
       result.add(arr[j]);

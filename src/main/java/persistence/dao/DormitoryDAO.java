@@ -3,6 +3,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+
 import persistence.dto.DormitoryDTO;
 
 public class DormitoryDAO {
@@ -36,16 +38,13 @@ public class DormitoryDAO {
     }
 
     // 선발 일정 목록 전송 함수
-    public ArrayList<DormitoryDTO> eventList() {
+    public List<DormitoryDTO> selectAllEventList() {
         DormitoryDTO dormitoryDTO = new DormitoryDTO();
-
-
         ArrayList<DormitoryDTO> eventList = new ArrayList<>();
 
         String query = "SELECT e.start_date, e.end_date, e.event_name, e.writed_date, u.name " +
                        "FROM event_schedule e " +
                        "JOIN user u ON e.user_id = u.id";
-
 
         try (PreparedStatement stmt = connection.prepareStatement(query); ResultSet rs = stmt.executeQuery())
         {
@@ -105,7 +104,7 @@ public class DormitoryDAO {
     }
 
     // 생활관 사용료 및 급식비 목록 전송 함수
-    public ArrayList<DormitoryDTO> getAllDormitoryFee() {
+    public List<DormitoryDTO> selectAllDormitoryFee() {
         DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         ArrayList<DormitoryDTO> dormitoryFeeList = new ArrayList<>();
@@ -135,7 +134,7 @@ public class DormitoryDAO {
     }
 
     // 생활관 목록 전송 함수
-    public ArrayList<DormitoryDTO> getDormitoryInfo() {
+    public List<DormitoryDTO> getDormitoryInfo() {
         DormitoryDTO dormitoryDTO = new DormitoryDTO();
 
         ArrayList<DormitoryDTO> dormitoryInfo = new ArrayList<>();

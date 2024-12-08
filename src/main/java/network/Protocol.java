@@ -3,15 +3,17 @@ import lombok.Getter;
 import lombok.Setter;
 import persistence.dto.*;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 public class Protocol {
   private byte type;
   private byte code;
   private int dataLength;
-  private DTO data;
+  private Object data;
 
-  public Protocol(byte t, byte c, int dL, DTO d) {
+  public Protocol(byte t, byte c, int dL, Object d) {
     type = t;
     code = c;
     dataLength = dL;
@@ -26,7 +28,7 @@ public class Protocol {
     byte[] dataByteArray = new byte[0];
     if (data != null) {
       try {
-        dataByteArray = Serializer.getBytes(data);
+        dataByteArray = Serializer.getBytes((Serializable) data);
       } catch (Exception e) {
         e.printStackTrace();
       }
