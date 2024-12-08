@@ -25,6 +25,8 @@ public class LoginDAO {
                     userDto = new UserDTO();
                     userDto.setUserRole(rs.getString("user_role"));
                 }
+                else
+                    return userDto;
             }
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());

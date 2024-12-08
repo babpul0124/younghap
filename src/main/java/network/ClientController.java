@@ -40,7 +40,6 @@ public class ClientController {
                 dos.write(request_login.getBytes());
                 if (dis.read(readBuf) != -1) {
                     Protocol protocol = new Protocol(readBuf);
-
                     if (protocol.getCode() == ProtocolCode.ID_PWD) {
                         UserDTO user = viewer.loginScreen(keyInput);
                         Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.ID_PWD, 0, user);

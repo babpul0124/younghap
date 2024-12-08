@@ -7,27 +7,27 @@ import java.net.*;
 
 class ConnectThread extends Thread
 {
-    ServerSocket serverSocket;
-    int count = 1;
+  ServerSocket serverSocket;
 
-    ConnectThread (ServerSocket serverSocket)
-    {
-        this.serverSocket = serverSocket;
-    }
+  ConnectThread (ServerSocket serverSocket)
+  {
+    this.serverSocket = serverSocket;
+  }
 
-    @Override
-    public void run ()
+  @Override
+  public void run ()
+  {
+    try
     {
-        try {
-            while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("    Thread " + count + " is started.");
-                ClientThread clientThread = new ClientThread(socket, count);
-                clientThread.start();
-                count++;
-            }
-        } catch (IOException e) {
-            System.out.println("    SERVER CLOSE    ");
-        }
+      while (true)
+      {
+        Socket socket = serverSocket.accept();
+        ClientThread clientThread = new ClientThread(socket);
+        clientThread.start();
+      }
+    } catch (IOException e)
+    {
+      System.out.println("    SERVER CLOSE    ");
     }
+  }
 }
