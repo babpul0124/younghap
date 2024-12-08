@@ -127,37 +127,37 @@ public class Viewer {
         return dto;
     }
 
-    public void viewApplicationListDTOs(ArrayList<ApplicationListDTO> DTOs) {
+    public void viewApplicationListDTOs(ArrayList<CheckInDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            System.out.println("[" + i + "] " + DTOToString.ApplicationListDTOToString(DTOs.get(i)));
+            System.out.println("[" + i + "] " + DTOToString.ApplicationToString(DTOs.get(i)));
         }
         System.out.println();
     }
 
-    public void viewPaymentListDTOs(ArrayList<ApplicationListDTO> DTOs) {
+    public void viewPaymentListDTOs(ArrayList<CheckInDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.PaymentListToString(DTOs.get(i)));
         }
         System.out.println();
     }
 
-    public void viewUnpaymentListDTOs(ArrayList<ApplicationListDTO> DTOs) {
+    public void viewUnpaymentListDTOs(ArrayList<CheckInDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.PaymentListToString(DTOs.get(i)));
         }
         System.out.println();
     }
 
-    public void viewPassed(ArrayList<ApplicationListDTO> DTOs) {
+    public void viewPassed(ArrayList<CheckInDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
-            if(DTOs.get(i).getApplicationDTO().getApplicationStatus().equals(ApplicationDTO.ApplicationStatus.승인)){
+            if(DTOs.get(i).getApplicationStatus().equals("승인")){
                 System.out.println("[" + i + "] " + DTOToString.PassedApplicationListDTOToString(DTOs.get(i)));
             }
         }
         System.out.println();
     }
 
-    public void viewTuberculosisCertificaterList(ArrayList<ApplicationListDTO> DTOs) {
+    public void viewTuberculosisCertificaterList(ArrayList<CheckInDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.TuberculosisCertificaterListToString(DTOs.get(i)));
         }
@@ -176,7 +176,7 @@ public class Viewer {
         return Integer.parseInt(keyInput.readLine());
     }
 
-    public void viewEventDTO(ArrayList<EventDTO> DTOs) {
+    public void viewEventDTO(ArrayList<DormitoryDTO> DTOs) {
         for(int i = 0; i < DTOs.size(); i++) {
             System.out.println("[" + i + "] " + DTOToString.event_scheduleDTOToString(DTOs.get(i)));
         }
@@ -186,7 +186,7 @@ public class Viewer {
     public String[] applicationInfo(UserDTO me) throws IOException {
         String[] result = new String[5];
 
-        result[0] = me.getId() + ""; //학번
+        result[0] = me + ""; //학번
         System.out.println("[입사 신청 정보 입력]");
         System.out.print("생활관 ID: ");
         result[1] = keyInput.readLine();
