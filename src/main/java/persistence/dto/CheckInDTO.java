@@ -11,6 +11,7 @@ import java.time.LocalDate;
 public class CheckInDTO extends DTO{
     private int dormitoryId;
     private String dormitoryName;
+    private String dormitoryFee;
     private int userId;
     private String userName;
     private int preference;
