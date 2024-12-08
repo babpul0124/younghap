@@ -37,11 +37,11 @@ public class Client {
         while(true){
             me = con.login();
             if (me != null) {
-                String User_role = me.getUser_role(); //User_role 얻어옴
-                if (User_role.equals(User_role.MANAGER.getName())) {
+                String user_role = me.getUserRole(); //User_role 얻어옴
+                if (user_role.equals("관리자")) {
                     managerRun();
                 }
-                else if (user_role.equals(User_role.USER.getName())) {
+                else if (user_role.equals("학생")) {
                     studentRun();
                 }
             }
