@@ -1,6 +1,5 @@
 package network;
 
-import com.mysql.cj.protocol.Protocol;
 import service.*;
 import persistence.dto.*;
 import persistence.dao.*;
@@ -9,17 +8,8 @@ import java.io.*;
 import java.net.Socket;
 
 public class ClientThread extends Thread {
-    private DataInputStream dis;
-    private DataOutputStream dos;
-
-    private InputStream is;
-    private OutputStream os;
     private BufferedReader br;
-    private BufferedWriter bw;
-
-    private final int BUF_SIZE = 1024;
-    private byte[] readBuf = new byte[BUF_SIZE];
-    private Protocol send_protocol;
+    private PrintWriter bw;
 
     private final Socket clientSocket;
     private final UserService userService;
@@ -33,31 +23,20 @@ public class ClientThread extends Thread {
 
     @Override
     public void run() {
-        try (
-                InputStream is = clientSocket.getInputStream();
-                OutputStream os = clientSocket.getOutputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                PrintWriter writer = new PrintWriter(os, true)
-        ) {
-            writer.println("클라이언트에 연결되었습니다.");
+        try {
+            // InputStream과 OutputStream을 설정
+            InputStream is = clientSocket.getInputStream();
+            OutputStream os = clientSocket.getOutputStream();
 
-            while (true) {
-                writer.println("1. 로그인\n2. 종료");
-                writer.print("선택: ");
-                int choice = Integer.parseInt(reader.readLine());
+            // BufferedReader와 PrintWriter 설정
+            br = new BufferedReader(new InputStreamReader(is));
+            bw = new PrintWriter(new OutputStreamWriter(os), true);
 
-                if (choice == 1) {
-                    handleLogin(reader, writer);  // 로그인 처리
-                } else if (choice == 2) {
-                    writer.println("프로그램을 종료합니다.");
-                    clientSocket.close();
-                    break;
-                } else {
-                    writer.println("잘못된 선택입니다. 다시 시도하세요.");
-                }
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("클라이언트 통신 오류: " + e.getMessage());
+            // 로그인 처리
+            handleLogin(br, bw);
+
+        } catch (IOException e) {
+            System.out.println("클라이언트와의 연결에 문제가 발생했습니다. " + e.getMessage());
         }
     }
 
@@ -72,8 +51,10 @@ public class ClientThread extends Thread {
         String role = userService.validateUser(loginId, password);
 
         if ("학생".equals(role)) {
+            writer.println("로그인 성공: 학생으로 접속합니다.");
             handleStudentActions(reader, writer);
         } else if ("관리자".equals(role)) {
+            writer.println("로그인 성공: 관리자로 접속합니다.");
             handleManagerActions(reader, writer);
         } else {
             writer.println("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.");
@@ -81,10 +62,12 @@ public class ClientThread extends Thread {
     }
 
     private void handleStudentActions(BufferedReader reader, PrintWriter writer) throws IOException {
-
+        // 학생 관련 작업을 여기에 구현합니다.
+        writer.println("학생 화면에 진입했습니다.");
     }
 
     private void handleManagerActions(BufferedReader reader, PrintWriter writer) throws IOException {
-
+        // 관리자 관련 작업을 여기에 구현합니다.
+        writer.println("관리자 화면에 진입했습니다.");
     }
 }
