@@ -24,14 +24,15 @@ public class Deserializer {
     int length = byteArrayToInt(lengthByteArray);
 
     byte[] stringByteArray = new byte[length];
-    System.arraycopy(objInfo, idx, stringByteArray,  0, length); idx += length;
+    System.arraycopy(objInfo, idx, stringByteArray, 0, length); idx += length;
     name = new String(stringByteArray);
+
+    // 디버그: 클래스 이름 출력
+    System.out.println("Class name to load: " + name);
 
     Class<?> c = Class.forName(name);
     idx = checkVersion(c, objInfo, idx);
-    Object result = null;
-
-    result = makeObject(c, objInfo, idx);
+    Object result = makeObject(c, objInfo, idx);
 
     return result;
   }

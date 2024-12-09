@@ -44,10 +44,9 @@ public class ClientController {
                         LoginDTO user = viewer.loginScreen(keyInput);
                         Protocol respond_login = new Protocol(ProtocolType.RESPOND, ProtocolCode.ID_PWD, 0, user);
                         dos.write(respond_login.getBytes());
-
-                        UserDTO me = null;
                         if (dis.read(readBuf) != -1) {
-                            me = (UserDTO) new Protocol(readBuf).getData();
+                            UserDTO me = (UserDTO) new Protocol(readBuf).getData();
+                            System.out.println();
                             return me;
                         }
                     }

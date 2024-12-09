@@ -23,13 +23,25 @@ public class ClientThread extends Thread {
   private Protocol send_protocol;
   static Connection connect;
 
-  private final static CheckInDAO checkInDAO = new CheckInDAO(connect);
-  private final static CheckOutDAO checkOutDAO = new CheckOutDAO(connect);
-  private final static DormitoryDAO dormitoryDAO = new DormitoryDAO(connect);
-  private final static LoginDAO loginDAO = new LoginDAO(connect);
+  private static CheckInDAO checkInDAO = new CheckInDAO(connect);
+  private static CheckOutDAO checkOutDAO = new CheckOutDAO(connect);
+  private static DormitoryDAO dormitoryDAO = new DormitoryDAO(connect);
+  private static LoginDAO loginDAO = new LoginDAO(connect);
 
-  private final static UserService userService = new UserService(checkInDAO, checkOutDAO, dormitoryDAO, loginDAO);
+  private static UserService userService = new UserService(checkInDAO, checkOutDAO, dormitoryDAO, loginDAO);
 
+  static {
+    try {
+      connect = DatabaseConnection.getConnection(); // Connection 초기화
+      checkInDAO = new CheckInDAO(connect);
+      checkOutDAO = new CheckOutDAO(connect);
+      dormitoryDAO = new DormitoryDAO(connect);
+      loginDAO = new LoginDAO(connect);
+      userService = new UserService(checkInDAO, checkOutDAO, dormitoryDAO, loginDAO);
+    } catch (Exception e) {
+      throw new RuntimeException("DAO 또는 Service 초기화 중 오류 발생: " + e.getMessage(), e);
+    }
+  }
 
   public ClientThread(Socket clientSocket) {
     this.clientSocket = clientSocket;
@@ -90,8 +102,9 @@ public class ClientThread extends Thread {
     UserDTO userDto = userService.login(loginDTO);
     if (userDto != null) {
       send_protocol = new Protocol(ProtocolType.RESULT, ProtocolCode.SUCCESS, 0, userDto);
-    } else
+    } else{
       send_protocol = new Protocol(ProtocolType.RESULT, ProtocolCode.FAILURE, 0, null);
+    }
     dos.write(send_protocol.getBytes());
   }
 

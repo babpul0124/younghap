@@ -13,8 +13,9 @@ public class LoginDAO {
     }
 
     public UserDTO selectLogInUser(LoginDTO loginDTO) {
+
         UserDTO userDto = null;
-        String query = "SELECT user_id, user_role FROM user WHERE user_id = ? AND user_pwd = ?";
+        String query = "SELECT login_id, user_role FROM user WHERE login_id = ? AND user_pwd = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, loginDTO.getLoginId());
@@ -24,6 +25,7 @@ public class LoginDAO {
                 if (rs.next()) { // 결과가 있으면
                     userDto = new UserDTO();
                     userDto.setUserRole(rs.getString("user_role"));
+                    return userDto;
                 }
                 else
                     return userDto;

@@ -41,7 +41,7 @@ public class Serializer {
     try {
       Field uidField = c.getDeclaredField(UID_FIELD_NAME);
       uidField.setAccessible(true);
-      uid = (long) uidField.get(result);
+      uid = (long) uidField.get(obj);
     }
     catch (NoSuchFieldException e) {  }
 
